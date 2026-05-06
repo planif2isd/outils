@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2ISD - Planificateur de Prestation</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:Outfit,sans-serif;background:#fff;color:#111}
+
+.hdr{background:#111;padding:12px 40px;display:flex;align-items:center;gap:20px;position:sticky;top:0;z-index:100;box-shadow:0 2px 24px rgba(0,0,0,.3)}
+.logo{font-family:Bebas Neue,sans-serif;font-size:54px;color:#FFD600;line-height:1;letter-spacing:5px}
+.logo b{color:#fff}
+.hdr-info{display:flex;flex-direction:column;gap:2px}
+.hdr-title{font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#aaa}
+.hdr-sub{font-size:10px;color:#555;letter-spacing:1px}
+
+.section{padding:36px 40px;border-bottom:2px solid #e8e8e8}
+.sec-hdr{display:flex;align-items:center;gap:14px;margin-bottom:24px}
+.sec-num{width:32px;height:32px;border-radius:50%;background:#FFD600;color:#111;font-family:Bebas Neue,sans-serif;font-size:18px;display:flex;align-items:center;justify-content:center}
+.sec-title{font-family:Bebas Neue,sans-serif;font-size:22px;letter-spacing:3px;color:#111}
+.sec-tag{margin-left:auto;font-size:11px;color:#999;letter-spacing:.5px}
+
+.form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.fgrp{display:flex;flex-direction:column;gap:6px}
+.fgrp.s2{grid-column:span 2}
+.fgrp.s4{grid-column:1/-1}
+label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#555}
+input[type=text],input[type=time],select,input[type=number]{border:1.5px solid #e8e8e8;border-radius:8px;padding:10px 13px;font-family:Outfit,sans-serif;font-size:13px;font-weight:500;color:#111;background:#fff;outline:none;width:100%}
+input:focus,select:focus{border-color:#FFD600;box-shadow:0 0 0 3px rgba(255,214,0,.16)}
+
+.depart-input{border:1.5px solid #e8e8e8;border-radius:8px;padding:10px 13px;font-size:12px;font-weight:600;color:#555;background:#f6f6f4;outline:none;width:100%;cursor:pointer}
+.depart-input:focus{border-color:#FFD600;background:#fff;color:#111;box-shadow:0 0 0 3px rgba(255,214,0,.16);cursor:text}
+.depart-hint{font-size:10px;color:#999;margin-top:4px}
+
+.ps-wrap{position:relative;width:100%}
+.ps-input-row{display:flex;gap:6px}
+.ps-input{flex:1;border:1.5px solid #e8e8e8;border-radius:8px;padding:10px 13px;font-size:13px}
+.ps-btn{background:#FFD600;border:none;border-radius:8px;padding:10px 14px;cursor:pointer;font-size:16px}
+.ps-btn:hover{background:#e6c200}
+.ps-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1.5px solid #FFD600;border-radius:10px;box-shadow:0 10px 32px rgba(0,0,0,.15);z-index:500;display:none;max-height:340px;overflow-y:auto}
+.ps-dropdown.open{display:block}
+.ps-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid #e8e8e8;display:flex;align-items:flex-start;gap:10px}
+.ps-item:hover,.ps-item.focused{background:#fffbe6}
+.ps-item-icon{font-size:18px}
+.ps-item-name{font-size:13px;font-weight:700;color:#111;margin-bottom:2px}
+.ps-item-addr{font-size:11px;color:#999;line-height:1.4}
+.ps-item-badge{display:inline-block;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;background:#FFD600;color:#111;padding:1px 7px;border-radius:10px;margin-bottom:3px}
+.ps-confirmed{display:none;align-items:flex-start;gap:10px;background:#f0faf4;border:1.5px solid #4caf50;border-radius:8px;padding:10px 12px;margin-top:6px}
+.ps-confirmed.show{display:flex}
+.ps-confirmed-name{font-size:13px;font-weight:700;color:#1b5e20}
+.ps-confirmed-addr{font-size:11px;color:#388e3c}
+.ps-confirmed-clear{background:none;border:none;cursor:pointer;color:#aaa;font-size:18px;margin-left:auto}
+.ps-searching{padding:12px 14px;font-size:12px;color:#999;display:flex;align-items:center;gap:8px}
+.err-msg{color:#d44;font-size:11px;font-weight:600;display:none;margin-top:4px}
+
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 32px;font-family:Bebas Neue,sans-serif;font-size:18px;letter-spacing:3px;border-radius:8px;cursor:pointer;border:none;transition:.15s}
+.btn-y{background:#FFD600;color:#111;box-shadow:4px 4px 0 #111}
+.btn-y:hover{background:#e6c200;transform:translate(-1px,-1px);box-shadow:5px 5px 0 #111}
+.btn-y:active{transform:translate(1px,1px);box-shadow:2px 2px 0 #111}
+.btn-dk{background:#111;color:#FFD600;border:2px solid #FFD600}
+.btn-dk:hover{background:#FFD600;color:#111}
+.btn:disabled{opacity:.4;pointer-events:none}
+
+.spin-row{display:none;align-items:center;gap:10px;padding:14px 0;color:#999;font-size:13px;font-weight:600}
+.spin-row.on{display:flex}
+.spinner{width:20px;height:20px;border:3px solid #e8e8e8;border-top-color:#FFD600;border-radius:50%;animation:spin .65s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.res-block{display:none;margin-top:28px}
+.res-block.on{display:block}
+
+/* CARTE FRANCE */
+.france-map-box{border-radius:14px;overflow:hidden;border:3px solid #FFD600;margin-bottom:22px;background:#1a1a1a}
+.france-map-hdr{background:#111;color:#FFD600;font-family:Bebas Neue,sans-serif;font-size:16px;letter-spacing:3px;padding:10px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.france-map-stats{display:flex;gap:18px;font-family:Outfit,sans-serif;font-size:11px;color:#fff;font-weight:600;letter-spacing:1px}
+.france-map-stats span strong{color:#FFD600;font-family:Bebas Neue,sans-serif;font-size:16px;letter-spacing:1px;margin-right:4px}
+#france-map{width:100%;height:380px}
+.fmap-marker-dep{background:#FFD600;width:18px;height:18px;border-radius:50%;border:3px solid #111;box-shadow:0 0 0 3px rgba(255,214,0,.4),0 2px 6px rgba(0,0,0,.4)}
+.fmap-marker-dest{background:#d44;width:22px;height:22px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 3px rgba(220,68,68,.4),0 2px 8px rgba(0,0,0,.5);position:relative}
+.fmap-marker-dest::after{content:"";position:absolute;top:-3px;left:50%;transform:translateX(-50%);width:6px;height:34px;background:linear-gradient(to bottom,#d44 30%,transparent);z-index:-1}
+.fmap-popup{font-family:Outfit,sans-serif;font-size:12px;font-weight:600;color:#111}
+.fmap-popup b{color:#FFD600;background:#111;padding:2px 6px;border-radius:4px;font-weight:700}
+
+/* HERO */
+.res-hero{background:#111;border-radius:14px;padding:22px 28px;display:flex;align-items:center;gap:28px;margin-bottom:18px;flex-wrap:wrap}
+.rh-main{text-align:center;min-width:160px}
+.rh-lbl{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:#666;margin-bottom:5px}
+.rh-val{font-family:Bebas Neue,sans-serif;font-size:60px;color:#FFD600;letter-spacing:5px;line-height:1}
+.rh-sub{font-size:10px;color:#555;margin-top:4px}
+.rh-sep{width:1px;background:#2a2a2a;align-self:stretch;min-height:80px}
+.tl-wrap{flex:1;overflow-x:auto;min-width:0;padding:4px 0}
+.tl{display:flex;align-items:flex-start;min-width:max-content}
+.tl-step{display:flex;flex-direction:column;align-items:center;min-width:74px}
+.tl-top{display:flex;width:100%;align-items:center}
+.tl-dot{width:10px;height:10px;border-radius:50%;background:#FFD600}
+.tl-line{flex:1;height:2px;background:#FFD600}
+.tl-time{font-family:Bebas Neue,sans-serif;font-size:14px;color:#FFD600;text-align:center;margin-top:5px}
+.tl-lbl{font-size:8px;letter-spacing:.8px;text-transform:uppercase;color:#666;text-align:center;margin-top:2px;line-height:1.3}
+
+.res-rows{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:22px}
+.res-row{background:#111;border-radius:10px;padding:13px 15px}
+.rr-lbl{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555;margin-bottom:4px;font-weight:700}
+.rr-val{font-family:Bebas Neue,sans-serif;font-size:20px;color:#fff;letter-spacing:1px}
+.rr-val.hl{color:#FFD600}
+
+/* FICHE LIEU */
+.place-card{background:#fff;border:2.5px solid #FFD600;border-radius:14px;overflow:hidden;margin-bottom:22px;display:none}
+.place-card.show{display:block}
+.place-card-hdr{background:#111;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.place-card-title{font-family:Bebas Neue,sans-serif;font-size:24px;letter-spacing:2px;color:#fff;line-height:1.1}
+.place-card-title em{color:#FFD600;font-style:normal}
+.place-card-sub{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#888;margin-top:2px}
+.place-card-body{padding:20px 22px;display:grid;grid-template-columns:1fr 1.4fr;gap:24px}
+.place-card-info-block label{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#999;margin-bottom:4px;display:block}
+.place-card-info-block .val{font-size:13px;color:#111;line-height:1.5;margin-bottom:14px}
+.place-card-info-block .val strong{font-weight:700}
+.place-card-stars{color:#FFD600;font-size:16px;letter-spacing:2px;margin-right:6px}
+.place-card-actions{display:flex;flex-direction:column;gap:8px}
+.place-action-btn{display:flex;align-items:center;gap:8px;padding:11px 14px;border-radius:8px;text-decoration:none;font-size:12px;font-weight:700;transition:.15s;border:none;cursor:pointer;text-align:left}
+.place-action-btn.primary{background:#4285F4;color:#fff}
+.place-action-btn.primary:hover{background:#357ae8}
+.place-action-btn.dk{background:#111;color:#FFD600;border:1.5px solid #FFD600}
+.place-action-btn.dk:hover{background:#FFD600;color:#111}
+.place-action-btn.gr{background:#f6f6f4;color:#111;border:1.5px solid #e8e8e8}
+.place-action-btn.gr:hover{border-color:#FFD600}
+.place-action-icon{width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+
+.maps-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+.map-box{border-radius:12px;overflow:hidden;border:2.5px solid #FFD600}
+.map-hdr{background:#111;color:#FFD600;font-family:Bebas Neue,sans-serif;font-size:14px;letter-spacing:2px;padding:9px 14px;display:flex;justify-content:space-between;align-items:center}
+.map-hdr a{font-size:10px;color:#FFD600;text-decoration:none;opacity:.7}
+.map-hdr a:hover{opacity:1}
+.map-ph{height:320px;display:flex;align-items:center;justify-content:center;background:#f6f6f4;color:#999}
+
+.photos-box{border-radius:12px;overflow:hidden;border:2.5px solid #FFD600;margin-bottom:20px}
+.photos-hdr{background:#111;color:#FFD600;font-family:Bebas Neue,sans-serif;font-size:14px;letter-spacing:2px;padding:9px 14px;display:flex;justify-content:space-between}
+.photos-hdr span{font-size:10px;color:#666;font-family:Outfit,sans-serif;font-weight:600}
+.photos-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:#111;padding:4px}
+.photo-item{aspect-ratio:4/3;overflow:hidden;cursor:pointer;border-radius:4px;background:#f6f6f4}
+.photo-item img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-item:hover img{transform:scale(1.05)}
+.photos-spin{display:flex;align-items:center;gap:10px;padding:20px;color:#999;font-size:12px;background:#111}
+
+.costs-params{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.costs-params .fgrp{min-width:150px;max-width:200px}
+.cost-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.cost-card{background:#111;border-radius:12px;padding:20px;border:1.5px solid #2a2a2a}
+.cost-card:hover{border-color:#FFD600}
+.c-title{font-family:Bebas Neue,sans-serif;font-size:20px;letter-spacing:2px;color:#FFD600}
+.c-sub{font-size:9px;color:#555;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px}
+.citem{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #222}
+.citem:last-of-type{border-bottom:none}
+.cl{font-size:10px;color:#666;font-weight:600}
+.cv{font-family:Bebas Neue,sans-serif;font-size:17px;color:#fff}
+.ctotal{margin-top:10px;background:#FFD600;border-radius:7px;padding:9px 12px;display:flex;justify-content:space-between}
+.ctl{font-size:10px;color:#111;font-weight:700;letter-spacing:1px}
+.ctv{font-family:Bebas Neue,sans-serif;font-size:21px;color:#111}
+
+.notice{background:#f6f6f4;border-left:4px solid #FFD600;border-radius:0 8px 8px 0;padding:11px 15px;font-size:11px;color:#555;margin-top:14px;line-height:1.6}
+.notice strong{color:#111}
+
+.resto-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px;margin-top:16px}
+.rc{background:#fff;border:1.5px solid #e8e8e8;border-radius:10px;padding:16px;transition:.15s}
+.rc:hover{border-color:#FFD600;box-shadow:0 4px 14px rgba(255,214,0,.1);transform:translateY(-2px)}
+.rc-name{font-size:14px;font-weight:700;color:#111;margin-bottom:3px}
+.rc-cat{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#999;margin-bottom:7px}
+.rc-addr{font-size:11px;color:#555;line-height:1.4;margin-bottom:5px}
+.rc-meta{display:flex;flex-wrap:wrap;gap:12px;margin:6px 0;font-size:11px;color:#555}
+.rc-meta strong{color:#111}
+.chip{display:inline-block;background:#FFD600;color:#111;font-size:9px;font-weight:700;padding:2px 9px;border-radius:20px;margin-bottom:6px;margin-right:4px}
+.rc-link{font-size:10px;font-weight:700;padding:5px 11px;border-radius:12px;text-decoration:none;display:inline-block;margin-right:5px;margin-top:4px}
+.rc-link.maps{background:#FFD600;color:#111}
+.rc-link.ta{background:#00aa6c;color:#fff}
+.meta-link{font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;text-decoration:none}
+
+.divider{height:3px;background:linear-gradient(90deg,#FFD600,transparent);margin:0 40px}
+.export-wrap{padding:24px 40px;background:#f6f6f4;display:flex;align-items:center;gap:16px}
+
+.lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;align-items:center;justify-content:center}
+.lightbox.on{display:flex}
+.lightbox img{max-width:90vw;max-height:86vh;border-radius:8px}
+.lb-close{position:absolute;top:20px;right:28px;color:#FFD600;font-size:32px;cursor:pointer;font-weight:700}
+
+.leaflet-container{background:#1a1a1a}
+.leaflet-popup-content-wrapper{background:#FFD600;color:#111;border-radius:8px}
+.leaflet-popup-content{margin:8px 12px;font-size:12px;font-weight:600;font-family:Outfit,sans-serif}
+.leaflet-popup-tip{background:#FFD600}
+
+@media(max-width:900px){
+  .hdr{padding:10px 16px}.section{padding:22px 16px}.divider{margin:0 16px}
+  .form-grid{grid-template-columns:1fr 1fr}
+  .maps-grid,.place-card-body{grid-template-columns:1fr}
+  .cost-grid,.res-rows,.resto-grid{grid-template-columns:1fr 1fr}
+  .photos-grid{grid-template-columns:repeat(2,1fr)}
+  .logo{font-size:40px}#france-map{height:320px}
+}
+@media(max-width:580px){
+  .form-grid,.res-rows,.cost-grid,.resto-grid{grid-template-columns:1fr}
+  .fgrp.s2,.fgrp.s4{grid-column:1}
+}
+
+/* WARNING MODAL */
+.warn-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:9000;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s ease}
+.warn-overlay.on{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.warn-modal{background:#fff;border-radius:16px;max-width:560px;width:100%;overflow:hidden;border:3px solid #FFD600;box-shadow:0 20px 60px rgba(0,0,0,.5);animation:slideUp .3s ease}
+.warn-hdr{background:linear-gradient(135deg,#111 0%,#1a1a1a 100%);padding:22px 26px;display:flex;align-items:center;gap:16px;border-bottom:3px solid #FFD600}
+.warn-hdr-icon{font-size:42px;line-height:1;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.warn-hdr-title{font-family:Bebas Neue,sans-serif;font-size:24px;letter-spacing:3px;color:#FFD600;line-height:1.1}
+.warn-hdr-sub{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#888;margin-top:4px}
+.warn-body{padding:24px 26px}
+.warn-alert{background:#fff8d4;border-left:4px solid #FFD600;border-radius:0 8px 8px 0;padding:14px 16px;margin-bottom:18px;font-size:13px;color:#111;line-height:1.6}
+.warn-alert strong{color:#000}
+.warn-alert .time-big{font-family:Bebas Neue,sans-serif;font-size:32px;color:#d44;letter-spacing:3px;display:block;margin:4px 0}
+.warn-reco-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#666;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.warn-reco-title::before{content:"";flex:1;height:2px;background:#FFD600;max-width:30px}
+.warn-reco-title::after{content:"";flex:1;height:1px;background:#e8e8e8}
+.warn-reco-list{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.warn-reco{display:flex;align-items:flex-start;gap:14px;background:#f6f6f4;border-radius:10px;padding:14px 16px;border:1.5px solid #e8e8e8;transition:.15s}
+.warn-reco:hover{border-color:#FFD600;transform:translateY(-1px)}
+.warn-reco-icon{font-size:28px;flex-shrink:0;line-height:1}
+.warn-reco-body{flex:1}
+.warn-reco-name{font-size:14px;font-weight:700;color:#111;margin-bottom:3px}
+.warn-reco-desc{font-size:12px;color:#555;line-height:1.5}
+.warn-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.warn-btn{padding:11px 22px;border-radius:8px;cursor:pointer;font-family:Bebas Neue,sans-serif;font-size:14px;letter-spacing:2px;border:none;transition:.15s}
+.warn-btn-y{background:#FFD600;color:#111;box-shadow:3px 3px 0 #111}
+.warn-btn-y:hover{background:#e6c200;transform:translate(-1px,-1px);box-shadow:4px 4px 0 #111}
+.warn-btn-y:active{transform:translate(1px,1px);box-shadow:2px 2px 0 #111}
+.warn-btn-gr{background:#fff;color:#555;border:1.5px solid #e8e8e8}
+.warn-btn-gr:hover{border-color:#111;color:#111}
+
+/* WARNING BANNER inline (after warning was shown) */
+.warn-banner{display:none;background:linear-gradient(135deg,#fff8d4 0%,#fff3a8 100%);border:2px solid #FFD600;border-radius:12px;padding:14px 18px;margin-bottom:18px;align-items:center;gap:14px}
+.warn-banner.show{display:flex}
+.warn-banner-icon{font-size:30px;flex-shrink:0}
+.warn-banner-body{flex:1}
+.warn-banner-title{font-size:13px;font-weight:700;color:#111;margin-bottom:2px}
+.warn-banner-sub{font-size:11px;color:#555;line-height:1.5}
+.warn-banner-btn{background:#111;color:#FFD600;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:Bebas Neue,sans-serif;font-size:12px;letter-spacing:1.5px;flex-shrink:0}
+.warn-banner-btn:hover{background:#FFD600;color:#111}
+
+@media(max-width:580px){
+  .warn-modal{max-height:90vh;overflow-y:auto}
+  .warn-hdr{padding:18px 20px}
+  .warn-hdr-title{font-size:20px}
+  .warn-body{padding:18px 20px}
+  .warn-actions{flex-direction:column-reverse}
+  .warn-btn{width:100%}
+}
+
+/* ACTIVITY SELECTOR */
+.activity-section{padding:36px 40px;border-bottom:2px solid #e8e8e8;background:linear-gradient(180deg,#fffdf2 0%,#fff 100%)}
+.activity-row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px;align-items:end;max-width:1100px}
+.activity-cat-grp{display:flex;flex-direction:column;gap:6px}
+.activity-cat-grp label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#555}
+.activity-cat-grp select{border:1.5px solid #e8e8e8;border-radius:8px;padding:11px 13px;font-family:Outfit,sans-serif;font-size:13px;font-weight:500;color:#111;background:#fff;outline:none;cursor:pointer;width:100%}
+.activity-cat-grp select:focus{border-color:#FFD600;box-shadow:0 0 0 3px rgba(255,214,0,.16)}
+.activity-cat-grp optgroup{font-weight:700;color:#111;background:#fff8d4}
+.activity-cat-grp option{font-weight:500;color:#111;padding:4px}
+.activity-display{background:#111;border:1.5px solid #2a2a2a;border-radius:8px;padding:9px 14px;display:flex;align-items:center;gap:10px;min-height:42px;transition:.15s}
+.activity-display.has-value{border-color:#FFD600}
+.activity-display-icon{font-size:20px;flex-shrink:0;line-height:1}
+.activity-display-body{flex:1;min-width:0}
+.activity-display-lbl{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:#666;font-weight:700;line-height:1;margin-bottom:2px}
+.activity-display-val{font-family:Bebas Neue,sans-serif;font-size:18px;letter-spacing:1.5px;color:#FFD600;line-height:1.1}
+.activity-display-val.muted{color:#555;font-size:13px;font-family:Outfit,sans-serif;font-weight:600;letter-spacing:.5px}
+.act-apply-status{display:none;font-size:10px;color:#2e7d32;font-weight:700;margin-top:8px;padding:6px 10px;background:#f0faf4;border-radius:4px;border-left:3px solid #4caf50}
+.act-apply-status.show{display:block}
+.activity-hint{font-size:10px;color:#888;margin-top:8px;font-style:italic}
+@media(max-width:780px){
+  .activity-row{grid-template-columns:1fr}
+  .activity-display{min-height:38px}
+}
+</style>
+</head>
+<body>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <div class="lb-close">&times;</div>
+  <img id="lb-img" src="" alt="">
+</div>
+
+<!-- WARNING MODAL -->
+<div class="warn-overlay" id="warn-overlay" onclick="if(event.target===this)closeWarn()">
+  <div class="warn-modal">
+    <div class="warn-hdr">
+      <div class="warn-hdr-icon">&#9888;&#65039;</div>
+      <div>
+        <div class="warn-hdr-title">DEPART TRES MATINAL DETECTE</div>
+        <div class="warn-hdr-sub">Preconisations 2ISD</div>
+      </div>
+    </div>
+    <div class="warn-body">
+      <div class="warn-alert">
+        L'heure d'arrivee au bureau calculee est :
+        <span class="time-big" id="warn-time">--:--</span>
+        <strong>Avant 5h du matin</strong> &mdash; il est fortement deconseille de demander aux equipes de se mettre en route a une heure aussi matinale pour des raisons de securite et de fatigue.
+      </div>
+
+      <div class="warn-reco-title">Solutions recommandees</div>
+      <div class="warn-reco-list">
+        <div class="warn-reco">
+          <div class="warn-reco-icon">&#127909;</div>
+          <div class="warn-reco-body">
+            <div class="warn-reco-name">Depart la veille au soir</div>
+            <div class="warn-reco-desc">Organiser le depart de l'agence le jour precedent en fin de journee, afin d'arriver sur place sereinement et reposes.</div>
+          </div>
+        </div>
+        <div class="warn-reco">
+          <div class="warn-reco-icon">&#127976;</div>
+          <div class="warn-reco-body">
+            <div class="warn-reco-name">Prevoir une nuit d'hotel</div>
+            <div class="warn-reco-desc">Reserver des chambres d'hotel a proximite du lieu de prestation pour vos animateurs. <a href="#" id="warn-hotel-link" target="_blank" style="color:#111;font-weight:700;text-decoration:underline">Chercher des hotels &rarr;</a></div>
+          </div>
+        </div>
+        <div class="warn-reco">
+          <div class="warn-reco-icon">&#9881;&#65039;</div>
+          <div class="warn-reco-body">
+            <div class="warn-reco-name">Ajuster les parametres</div>
+            <div class="warn-reco-desc">Si possible, reduire le temps d'installation, retirer la pause repas, ou retarder le debut de prestation pour eviter le depart de nuit.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="warn-actions">
+        <button class="warn-btn warn-btn-gr" onclick="closeWarn()">Continuer quand meme</button>
+        <button class="warn-btn warn-btn-y" onclick="closeWarn()">J'ai compris</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="hdr">
+  <div class="logo">2<b>ISD</b></div>
+  <div class="hdr-info">
+    <div class="hdr-title">Planificateur de Prestation Evenementielle</div>
+    <div class="hdr-sub">Itineraire - Frais de route - Restauration - Lieux</div>
+  </div>
+  <div style="margin-left:auto">
+    <button class="btn btn-dk" onclick="exportPDF()" style="font-size:14px;padding:10px 22px;letter-spacing:2px">PDF</button>
+  </div>
+</div>
+
+<!-- SECTION 0 - ACTIVITE SOUHAITEE -->
+<div class="activity-section" id="s-activity">
+  <div class="sec-hdr">
+    <div class="sec-num">0</div>
+    <div class="sec-title">Activite Souhaitee</div>
+    <div class="sec-tag">Selection du produit avec preconisations</div>
+  </div>
+  <div class="activity-row">
+    <div class="activity-cat-grp">
+      <label>Activite (regroupees par gamme)</label>
+      <select id="activity-select" onchange="onActivitySelect()">
+        <option value="">-- Choisir une activite --</option>
+      </select>
+    </div>
+    <div class="activity-cat-grp">
+      <label>Temps d'installation / montage preconise</label>
+      <div class="activity-display" id="display-montage">
+        <div class="activity-display-icon">&#128296;</div>
+        <div class="activity-display-body">
+          <div class="activity-display-lbl">Montage</div>
+          <div class="activity-display-val muted" id="val-montage">--</div>
+        </div>
+      </div>
+    </div>
+    <div class="activity-cat-grp">
+      <label>Porte de chargement</label>
+      <div class="activity-display" id="display-porte">
+        <div class="activity-display-icon">&#128666;</div>
+        <div class="activity-display-body">
+          <div class="activity-display-lbl">Porte</div>
+          <div class="activity-display-val muted" id="val-porte">--</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="act-apply-status" id="act-apply-status"></div>
+  <div class="activity-hint" id="activity-hint">Selectionnez une activite pour voir les preconisations &mdash; le temps d'installation sera applique automatiquement au planificateur.</div>
+</div>
+
+<div class="section" id="s-trajet">
+  <div class="sec-hdr">
+    <div class="sec-num">1</div>
+    <div class="sec-title">Trajet et Calcul d'Horaire</div>
+  </div>
+  <div class="form-grid">
+    <div class="fgrp s2">
+      <label>Adresse de Depart</label>
+      <input type="text" id="depart" class="depart-input" value="171 avenue des longues pieces, 62231 Coquelles" title="Cliquez pour modifier"/>
+      <div class="depart-hint">Adresse par defaut - cliquez pour modifier</div>
+    </div>
+    <div class="fgrp s2">
+      <label>Lieu de la Prestation</label>
+      <div class="ps-wrap">
+        <div class="ps-input-row">
+          <input type="text" id="dest" class="ps-input" placeholder="Nom du lieu, adresse, ville..." autocomplete="off" oninput="psOnInput(this.value)" onkeydown="psKeyNav(event)"/>
+          <button class="ps-btn" onclick="psSearch(document.getElementById('dest').value)">&#128269;</button>
+        </div>
+        <div class="ps-dropdown" id="ps-dropdown"></div>
+      </div>
+      <div class="ps-confirmed" id="ps-confirmed">
+        <div style="font-size:20px">&#128205;</div>
+        <div style="flex:1">
+          <div class="ps-confirmed-name" id="ps-confirmed-name"></div>
+          <div class="ps-confirmed-addr" id="ps-confirmed-addr"></div>
+        </div>
+        <button class="ps-confirmed-clear" onclick="psClear()">&times;</button>
+      </div>
+      <div class="err-msg" id="dest-err">Lieu introuvable.</div>
+    </div>
+    <div class="fgrp">
+      <label>Debut de prestation</label>
+      <input type="time" id="event-start" value="19:00"/>
+    </div>
+    <div class="fgrp">
+      <label>Temps d'installation</label>
+      <select id="install">
+        <option value="30">30 min</option>
+        <option value="60" selected>1 heure</option>
+        <option value="90">1h30</option>
+        <option value="120">2 heures</option>
+      </select>
+    </div>
+    <div class="fgrp">
+      <label>Temps de chargement</label>
+      <select id="loading">
+        <option value="0">0 min</option>
+        <option value="15">15 min</option>
+        <option value="30" selected>30 min</option>
+        <option value="45">45 min</option>
+        <option value="60">1 heure</option>
+        <option value="90">1h30</option>
+        <option value="120">2 heures</option>
+      </select>
+    </div>
+    <div class="fgrp">
+      <label>Pause repas</label>
+      <select id="meal">
+        <option value="0">Non</option>
+        <option value="30">Oui - 30 min</option>
+      </select>
+    </div>
+    <div class="fgrp">
+      <label>Marge aleas route</label>
+      <select id="margin">
+        <option value="30" selected>+30 min securite</option>
+        <option value="0">Pas de marge</option>
+      </select>
+    </div>
+    <div class="fgrp s4" style="flex-direction:row;align-items:center;gap:16px;margin-top:6px">
+      <button class="btn btn-y" id="btn-calc" onclick="calculate()">CALCULER</button>
+      <div class="spin-row" id="spin"><div class="spinner"></div>Calcul en cours...</div>
+    </div>
+  </div>
+
+  <div class="res-block" id="res-block">
+
+    <!-- WARNING BANNER (apparait si arrivee avant 5h) -->
+    <div class="warn-banner" id="warn-banner">
+      <div class="warn-banner-icon">&#9888;&#65039;</div>
+      <div class="warn-banner-body">
+        <div class="warn-banner-title">Depart tres matinal &mdash; Preconisation : depart la veille</div>
+        <div class="warn-banner-sub">Arrivee au bureau a <strong id="warn-banner-time">--:--</strong>. Prevoir une nuit d'hotel pour les animateurs sur place.</div>
+      </div>
+      <button class="warn-banner-btn" onclick="showWarn()">Voir details</button>
+    </div>
+
+    <!-- CARTE FRANCE -->
+    <div class="france-map-box">
+      <div class="france-map-hdr">
+        <div>&#127467;&#127479; ITINERAIRE - VUE D'ENSEMBLE</div>
+        <div class="france-map-stats">
+          <span><strong id="fm-dist">-</strong>km</span>
+          <span><strong id="fm-time">-</strong></span>
+        </div>
+      </div>
+      <div id="france-map"></div>
+    </div>
+
+    <!-- FICHE LIEU -->
+    <div class="place-card" id="place-card">
+      <div class="place-card-hdr">
+        <div>
+          <div class="place-card-title">&#127963; <em id="place-name">-</em></div>
+          <div class="place-card-sub" id="place-type">Etablissement identifie</div>
+        </div>
+        <div id="place-rating-wrap"></div>
+      </div>
+      <div class="place-card-body">
+        <div class="place-card-info-block">
+          <label>Adresse complete</label>
+          <div class="val" id="place-addr">-</div>
+          <label>Coordonnees GPS</label>
+          <div class="val" id="place-gps">-</div>
+          <label>Distance depuis l'agence</label>
+          <div class="val" id="place-dist">-</div>
+        </div>
+        <div>
+          <label style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#999;margin-bottom:8px;display:block">Liens d'identification</label>
+          <div class="place-card-actions">
+            <a class="place-action-btn primary" id="link-google" target="_blank" href="#">
+              <span class="place-action-icon">&#127759;</span>
+              <span><strong>Fiche Google Maps</strong><br><span style="font-weight:400;font-size:10px;opacity:.85">Avis - Photos - Horaires</span></span>
+            </a>
+            <a class="place-action-btn dk" id="link-search" target="_blank" href="#">
+              <span class="place-action-icon">&#128269;</span>
+              <span><strong>Recherche Google</strong><br><span style="font-weight:400;font-size:10px;opacity:.7">Site web et infos</span></span>
+            </a>
+            <a class="place-action-btn gr" id="link-osm" target="_blank" href="#">
+              <span class="place-action-icon">&#128507;</span>
+              <span><strong>Voir sur OpenStreetMap</strong><br><span style="font-weight:400;font-size:10px;color:#999">Donnees ouvertes</span></span>
+            </a>
+            <button class="place-action-btn gr" onclick="copyPlaceLink()" style="cursor:pointer">
+              <span class="place-action-icon">&#128203;</span>
+              <span><strong>Copier le lien Google Maps</strong><br><span style="font-weight:400;font-size:10px;color:#999" id="copy-status">Cliquer pour copier</span></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="res-hero">
+      <div class="rh-main">
+        <div class="rh-lbl">Arrivee au bureau</div>
+        <div class="rh-val" id="r-arrival">--:--</div>
+        <div class="rh-sub" id="r-arrival-sub"></div>
+      </div>
+      <div class="rh-sep"></div>
+      <div class="tl-wrap"><div class="tl" id="timeline"></div></div>
+    </div>
+    <div class="res-rows">
+      <div class="res-row"><div class="rr-lbl">Trajet estime</div><div class="rr-val hl" id="r-drive">-</div></div>
+      <div class="res-row"><div class="rr-lbl">Distance</div><div class="rr-val" id="r-dist">-</div></div>
+      <div class="res-row"><div class="rr-lbl">Chargement</div><div class="rr-val" id="r-load">-</div></div>
+      <div class="res-row"><div class="rr-lbl">Marge</div><div class="rr-val" id="r-margin">-</div></div>
+      <div class="res-row"><div class="rr-lbl">Repas</div><div class="rr-val" id="r-meal">-</div></div>
+      <div class="res-row"><div class="rr-lbl">Installation</div><div class="rr-val" id="r-install">-</div></div>
+      <div class="res-row"><div class="rr-lbl">Debut prestation</div><div class="rr-val hl" id="r-event">-</div></div>
+      <div class="res-row"><div class="rr-lbl">Total a prevoir</div><div class="rr-val" id="r-total">-</div></div>
+    </div>
+    <div class="maps-grid">
+      <div class="map-box">
+        <div class="map-hdr">Vue Satellite<a id="sat-link" href="#" target="_blank">Google Maps</a></div>
+        <div id="map-satellite"><div class="map-ph">Calcul en cours...</div></div>
+      </div>
+      <div class="map-box">
+        <div class="map-hdr">Street View Pieton<a id="sv-link" href="#" target="_blank">Google Street View</a></div>
+        <div id="sv-container"><div class="map-ph">Calcul en cours...</div></div>
+      </div>
+    </div>
+    <div class="photos-box">
+      <div class="photos-hdr">Photos du Lieu<span id="photos-source">Recherche...</span></div>
+      <div id="photos-inner"><div class="photos-spin"><div class="spinner"></div>Recherche de photos...</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section" id="s-couts">
+  <div class="sec-hdr">
+    <div class="sec-num">2</div>
+    <div class="sec-title">Frais de Route</div>
+    <div class="sec-tag" id="dist-label">Calculez d'abord un trajet</div>
+  </div>
+  <div class="costs-params">
+    <div class="fgrp"><label>Prix carburant (E/L)</label><input type="number" id="fuel-price" value="1.85" step="0.01" min="0.5" max="5" oninput="refreshCosts()"/></div>
+    <div class="fgrp"><label>Type de trajet</label>
+      <select id="trip-type" onchange="refreshCosts()">
+        <option value="2">Aller-retour</option>
+        <option value="1">Aller simple</option>
+      </select>
+    </div>
+    <div class="fgrp"><label>Peage aller (E)</label><input type="number" id="toll-input" placeholder="0.00" step="0.50" min="0" value="0" oninput="refreshCosts()"/></div>
+  </div>
+  <div class="cost-grid">
+    <div class="cost-card">
+      <div class="c-title">Vehicule Leger</div><div class="c-sub">Voiture / Camionnette</div>
+      <div class="citem"><span class="cl">Conso.</span><span class="cv">8 L/100km</span></div>
+      <div class="citem"><span class="cl">Carburant</span><span class="cv" id="f-light">-</span></div>
+      <div class="citem"><span class="cl">Peages</span><span class="cv" id="t-light">-</span></div>
+      <div class="ctotal"><span class="ctl">TOTAL</span><span class="ctv" id="tot-light">-</span></div>
+    </div>
+    <div class="cost-card">
+      <div class="c-title">Fourgon 6 m2</div><div class="c-sub">Fourgon moyen</div>
+      <div class="citem"><span class="cl">Conso.</span><span class="cv">12 L/100km</span></div>
+      <div class="citem"><span class="cl">Carburant</span><span class="cv" id="f-6">-</span></div>
+      <div class="citem"><span class="cl">Peages</span><span class="cv" id="t-6">-</span></div>
+      <div class="ctotal"><span class="ctl">TOTAL</span><span class="ctv" id="tot-6">-</span></div>
+    </div>
+    <div class="cost-card">
+      <div class="c-title">Fourgon 12 m2</div><div class="c-sub">Grand fourgon</div>
+      <div class="citem"><span class="cl">Conso.</span><span class="cv">16 L/100km</span></div>
+      <div class="citem"><span class="cl">Carburant</span><span class="cv" id="f-12">-</span></div>
+      <div class="citem"><span class="cl">Peages</span><span class="cv" id="t-12">-</span></div>
+      <div class="ctotal"><span class="ctl">TOTAL</span><span class="ctv" id="tot-12">-</span></div>
+    </div>
+  </div>
+  <div class="notice"><strong>Peages :</strong> Saisissez le tarif aller. Le retour est multiplie automatiquement.</div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section" id="s-resto">
+  <div class="sec-hdr">
+    <div class="sec-num">3</div>
+    <div class="sec-title">Restauration a Proximite</div>
+    <div class="sec-tag">5 km - Budget &le; 15 E/pers.</div>
+  </div>
+  <div id="resto-meta" style="display:none;margin-bottom:14px;align-items:center;gap:10px;flex-wrap:wrap">
+    <span style="font-size:11px;color:#999">Liens rapides :</span>
+    <a id="resto-gmaps-link" href="#" target="_blank" class="meta-link" style="background:#FFD600;color:#111">Google Maps Restaurants</a>
+    <a id="resto-ta-link" href="#" target="_blank" class="meta-link" style="background:#00aa6c;color:#fff">TripAdvisor</a>
+  </div>
+  <div id="resto-wrap"><div class="notice">Calculez d'abord un trajet pour voir les restaurants.</div></div>
+</div>
+
+<div class="export-wrap">
+  <button class="btn btn-y" onclick="exportPDF()">EXPORTER EN PDF</button>
+  <span style="font-size:12px;color:#999">Fiche complete : horaires, frais, restauration</span>
+</div>
+
+<script>
+var S={dest:"",distKm:0,driveMin:0,arrivalTime:"",eventStart:"",load:0,meal:0,install:0,margin:0,lat:0,lng:0,depLat:0,depLng:0,restaurants:[],calculated:false,placeInfo:null,routeGeometry:null};
+var AGENCY_LAT=50.9195,AGENCY_LNG=1.825;
+var DEFAULT_DEPART="171 avenue des longues pieces, 62231 Coquelles";
+var franceMap=null;
+
+function parseMin(t){var p=t.split(":").map(Number);return p[0]*60+p[1]}
+function fmtTime(m){m=((m%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0")}
+function fmtDur(m){if(!m)return"0 min";if(m<60)return m+" min";var h=Math.floor(m/60),r=m%60;return r?h+"h"+String(r).padStart(2,"0"):h+"h00"}
+function fmtDist(m){return m<1000?m+"m":(m/1000).toFixed(1)+"km"}
+
+
+function showWarn(){
+  document.getElementById("warn-overlay").classList.add("on");
+  document.body.style.overflow="hidden";
+}
+function closeWarn(){
+  document.getElementById("warn-overlay").classList.remove("on");
+  document.body.style.overflow="";
+}
+function checkEarlyDeparture(arrMin){
+  // arrMin = heure d'arrivee au bureau en minutes depuis minuit
+  // Normaliser: si negatif (la veille) ou < 5*60 (avant 5h)
+  var displayMin=((arrMin%1440)+1440)%1440;
+  var isEarly=displayMin<300; // avant 5h00
+  var banner=document.getElementById("warn-banner");
+  if(isEarly){
+    var timeStr=fmtTime(arrMin);
+    document.getElementById("warn-time").textContent=timeStr;
+    document.getElementById("warn-banner-time").textContent=timeStr;
+    // Hotel search link near destination
+    var hotelLink="https://www.google.com/maps/search/hotel/@"+S.lat+","+S.lng+",14z";
+    document.getElementById("warn-hotel-link").href=hotelLink;
+    banner.classList.add("show");
+    showWarn();
+  }else{
+    banner.classList.remove("show");
+  }
+}
+document.addEventListener("keydown",function(e){
+  if(e.key==="Escape"&&document.getElementById("warn-overlay").classList.contains("on"))closeWarn();
+});
+
+var ACTIVITIES=[{c:"Gamme collaborative",n:"Tour du monde en solidaire",t:"1h30",m:90,p:"B"},{c:"Gamme collaborative",n:"Tous sur le pont",t:"1h30",m:90,p:"B"},{c:"Gamme collaborative",n:"Réaction en chaîne",t:"1h30",m:90,p:"A"},{c:"Gamme collaborative",n:"Le réseau",t:"1h30",m:90,p:"A"},{c:"Urban Games / Tablettes",n:"Urban pursuit",t:"30min",m:30,p:"A + local"},{c:"Urban Games / Tablettes",n:"Les 12 travaux",t:"45min",m:45,p:"A"},{c:"Urban Games / Tablettes",n:"Citizen gaming",t:"45min",m:45,p:"A"},{c:"Rallye",n:"City express",t:"45min",m:45,p:"A"},{c:"Rallye",n:"Course d'orientation",t:"2h",m:120,p:"A"},{c:"Multi-activités",n:"Olympiades Festisports",t:"2h",m:120,p:"D"},{c:"Multi-activités",n:"Challenge Robinson",t:"1h30",m:90,p:"C"},{c:"Multi-activités",n:"A la conquête de l'Eldo Rado",t:"2h",m:120,p:"C"},{c:"Multi-activités",n:"Challenge du fort",t:"1h30",m:90,p:"C"},{c:"Multi-activités",n:"Olympiades Zapping TV",t:"1h30",m:90,p:"B"},{c:"Multi-activités",n:"Squid Gang",t:"2h",m:120,p:"D"},{c:"Créatives",n:"Ca cartonne",t:"1h30",m:90,p:"B"},{c:"Créatives",n:"Festival du film",t:"1h30",m:90,p:"B"},{c:"Créatives",n:"Rallye Photos",t:"45min",m:45,p:"B"},{c:"Créatives",n:"Challenge kapla",t:"45min",m:45,p:"B"},{c:"Créatives",n:"Un légo presque parfait",t:"1h",m:60,p:"B"},{c:"Créatives",n:"Drum party",t:"1h30",m:90,p:"Presta extérieur"},{c:"Créatives",n:"Créa fresk",t:"1h30",m:90,p:"B"},{c:"Créatives",n:"Cineman'ia",t:"1h",m:60,p:"B"},{c:"Indoor",n:"L'enquete policiere",t:"1h30",m:90,p:"C"},{c:"Indoor",n:"Murder party 2.0",t:"1h30",m:90,p:"A"},{c:"Indoor",n:"Wine gaming",t:"1h30",m:90,p:"A"},{c:"Indoor",n:"Rallye sensoriel",t:"1h30",m:90,p:"A"},{c:"Indoor",n:"Le trésor des 5 Iles",t:"1h30",m:90,p:"C"},{c:"Indoor",n:"Escape game Medaille d'or",t:"1h30",m:90,p:"C"},{c:"Indoor",n:"Cinés'cape",t:"1h30",m:90,p:"C"},{c:"Indoor",n:"Retour vers les 90's",t:"1h",m:60,p:"C"},{c:"Indoor",n:"La Machine Infernale",t:"1h30",m:90,p:"C"},{c:"Indoor",n:"Keep Calm",t:"1h",m:60,p:"A + Local"},{c:"Indoor",n:"60's chrono",t:"1h",m:60,p:"A"},{c:"Soirée / happening",n:"Soirée bistrot",t:"2h",m:120,p:"B"},{c:"Soirée / happening",n:"Vidéo Game Party",t:"2h",m:120,p:"B"},{c:"Soirée / happening",n:"Les Défis Du Fort",t:"1h",m:60,p:"C"},{c:"Soirée / happening",n:"Who's who",t:"45min",m:45,p:"A + Local"},{c:"Soirée / happening",n:"Soirée Casino",t:"1h30",m:90,p:"B"},{c:"Soirée / happening",n:"Casino des Saveurs",t:"1h30",m:90,p:"B"},{c:"Soirée / happening",n:"Animation Quiz",t:"1h",m:60,p:"A + local"},{c:"Soirée / happening",n:"Prompt Master",t:"1h",m:60,p:"A + local"},{c:"Soirée / happening",n:"Star Quiz",t:"1h",m:60,p:"A + local"},{c:"Soirée / happening",n:"Ici tout est permis",t:"1h",m:60,p:"A + lcoal"},{c:"Soirée / happening",n:"Zapping TV",t:"1h",m:60,p:"B"},{c:"Soirée / happening",n:"Burger Party",t:"1h",m:60,p:"B"},{c:"Soirée / happening",n:"Photobooth + fond vert",t:"1h",m:60,p:"A"},{c:"Soirée / happening",n:"Print my wall",t:"1h30",m:90,p:"A"},{c:"Soirée / happening",n:"Magic Wall",t:"1h30",m:90,p:"A"},{c:"Spécial RSE",n:"Green express",t:"45min",m:45,p:"A"},{c:"Spécial RSE",n:"Dans l'air du temps",t:"1h30",m:90,p:"A"},{c:"Spécial RSE",n:"RS'Escape",t:"1h",m:60,p:"A"},{c:"Spécial RSE",n:"Home Made",t:"1h",m:60,p:"A"},];
+
+function initActivities(){
+  var sel=document.getElementById("activity-select");
+  if(!sel)return;
+  // Group by category using <optgroup>
+  var groups={};
+  ACTIVITIES.forEach(function(a,i){
+    if(!groups[a.c])groups[a.c]=[];
+    groups[a.c].push({i:i,a:a});
+  });
+  Object.keys(groups).forEach(function(cat){
+    var og=document.createElement("optgroup");
+    og.label=cat;
+    groups[cat].forEach(function(item){
+      var o=document.createElement("option");
+      o.value=item.i;
+      o.textContent=item.a.n;
+      og.appendChild(o);
+    });
+    sel.appendChild(og);
+  });
+}
+
+function onActivitySelect(){
+  var idx=document.getElementById("activity-select").value;
+  var dM=document.getElementById("display-montage");
+  var dP=document.getElementById("display-porte");
+  var vM=document.getElementById("val-montage");
+  var vP=document.getElementById("val-porte");
+  var status=document.getElementById("act-apply-status");
+  var hint=document.getElementById("activity-hint");
+
+  if(idx===""){
+    vM.textContent="--";vM.classList.add("muted");
+    vP.textContent="--";vP.classList.add("muted");
+    dM.classList.remove("has-value");
+    dP.classList.remove("has-value");
+    status.classList.remove("show");
+    hint.style.display="block";
+    window.SELECTED_ACTIVITY=null;
+    return;
+  }
+
+  var act=ACTIVITIES[parseInt(idx)];
+  if(!act)return;
+
+  // Display preconisations
+  vM.textContent=act.t;vM.classList.remove("muted");
+  vP.textContent=act.p||"Non specifie";vP.classList.remove("muted");
+  dM.classList.add("has-value");
+  dP.classList.add("has-value");
+  hint.style.display="none";
+
+  window.SELECTED_ACTIVITY={cat:act.c,name:act.n,minutes:act.m,timeStr:act.t,porte:act.p};
+
+  // Auto-apply to install field
+  var inst=document.getElementById("install");
+  if(inst){
+    var target=act.m;
+    var opts=Array.prototype.slice.call(inst.options);
+    var existing=opts.find(function(o){return parseInt(o.value)===target});
+    if(existing){
+      inst.value=existing.value;
+    }else{
+      // Add custom option
+      var prev=inst.querySelector("option[data-custom]");
+      if(prev)prev.remove();
+      var o=document.createElement("option");
+      o.value=target;
+      o.textContent=act.t+" (selon activite)";
+      o.setAttribute("data-custom","1");
+      inst.appendChild(o);
+      inst.value=target;
+    }
+    // Brief highlight
+    inst.style.transition="background .3s";
+    inst.style.background="#fff8d4";
+    setTimeout(function(){inst.style.background=""},1200);
+    status.innerHTML="&#10003; "+act.n+" &mdash; Installation reglee sur <strong>"+act.t+"</strong>"+(act.p?" &middot; Porte de chargement : <strong>"+act.p+"</strong>":"");
+    status.classList.add("show");
+  }
+}
+
+if(document.readyState==="loading"){
+  document.addEventListener("DOMContentLoaded",initActivities);
+}else{
+  initActivities();
+}
+
+
+var psTimer=null,psFocusIdx=-1,psResults=[],psChosen=null;
+
+function psOnInput(v){
+  psChosen=null;
+  document.getElementById("ps-confirmed").classList.remove("show");
+  if(v.length<2){psClose();return}
+  clearTimeout(psTimer);
+  psTimer=setTimeout(function(){psSearch(v)},300);
+}
+
+async function psSearch(q){
+  if(!q||q.length<2)return;
+  var dd=document.getElementById("ps-dropdown");
+  dd.innerHTML='<div class="ps-searching"><div class="spinner" style="width:14px;height:14px;border-width:2px"></div>Recherche...</div>';
+  dd.classList.add("open");
+  psResults=[];
+  try{
+    var res=await Promise.allSettled([
+      fetch("https://photon.komoot.io/api/?q="+encodeURIComponent(q)+"&limit=6&lang=fr&bbox=-5.2,41.3,9.6,51.2").then(function(r){return r.json()}),
+      fetch("https://nominatim.openstreetmap.org/search?format=json&q="+encodeURIComponent(q)+"&limit=6&countrycodes=fr&addressdetails=1&extratags=1",{headers:{"Accept-Language":"fr"}}).then(function(r){return r.json()})
+    ]);
+    var items=[];
+    if(res[0].status==="fulfilled"&&res[0].value&&res[0].value.features){
+      res[0].value.features.forEach(function(f){
+        if(!f.geometry||!f.geometry.coordinates)return;
+        var p=f.properties;
+        var name=p.housenumber&&p.street?p.housenumber+" "+p.street:p.name||p.street||"";
+        if(!name)return;
+        items.push({name:name,city:p.city||p.town||p.village||"",postcode:p.postcode||"",street:p.street||"",housenumber:p.housenumber||"",type:p.type||"",osm_id:p.osm_id||"",osm_type:p.osm_type||"",lat:f.geometry.coordinates[1],lng:f.geometry.coordinates[0]});
+      });
+    }
+    if(res[1].status==="fulfilled"&&Array.isArray(res[1].value)){
+      res[1].value.forEach(function(i){
+        var a=i.address||{};
+        var name=a.house_number&&a.road?a.house_number+" "+a.road:i.display_name.split(",")[0];
+        var n={name:name,city:a.city||a.town||a.village||"",postcode:a.postcode||"",street:a.road||"",housenumber:a.house_number||"",type:i.type||"",osm_id:i.osm_id||"",osm_type:i.osm_type||"",lat:parseFloat(i.lat),lng:parseFloat(i.lon)};
+        var dup=items.some(function(p){return Math.abs(p.lat-n.lat)<0.0007&&Math.abs(p.lng-n.lng)<0.0007});
+        if(!dup)items.push(n);
+      });
+    }
+    psResults=items.slice(0,7);
+    psFocusIdx=-1;
+    if(!psResults.length){
+      dd.innerHTML='<div class="ps-searching">Aucun resultat</div>';
+      return;
+    }
+    var icons={hotel:"&#127976;",castle:"&#127984;",manor:"&#127984;",restaurant:"&#127869;",cafe:"&#9749;",park:"&#127795;",museum:"&#127963;",house:"&#127968;",residential:"&#127960;",village:"&#127960;",hamlet:"&#127969;",city:"&#127750;",town:"&#127769;"};
+    var badges={hotel:"Hotel",castle:"Chateau",manor:"Manoir",restaurant:"Restaurant",cafe:"Cafe",park:"Parc",museum:"Musee",house:"Adresse",village:"Village",hamlet:"Lieu-dit",city:"Ville",town:"Ville"};
+    var html="";
+    psResults.forEach(function(item,i){
+      var icon=icons[item.type]||"&#128205;";
+      var badge=badges[item.type]||"";
+      var addrParts=[];
+      if(item.housenumber&&item.street)addrParts.push(item.housenumber+" "+item.street);
+      else if(item.street)addrParts.push(item.street);
+      if(item.postcode)addrParts.push(item.postcode);
+      if(item.city)addrParts.push(item.city);
+      var addr=addrParts.join(", ");
+      html+='<div class="ps-item" data-idx="'+i+'"><div class="ps-item-icon">'+icon+'</div><div style="flex:1;min-width:0">';
+      if(badge)html+='<div class="ps-item-badge">'+badge+'</div>';
+      html+='<div class="ps-item-name">'+item.name+'</div>';
+      if(addr)html+='<div class="ps-item-addr">'+addr+'</div>';
+      html+='</div></div>';
+    });
+    dd.innerHTML=html;
+    dd.querySelectorAll(".ps-item").forEach(function(el){
+      el.addEventListener("mousedown",function(e){
+        e.preventDefault();
+        psSelect(parseInt(el.dataset.idx));
+      });
+    });
+  }catch(e){
+    dd.innerHTML='<div class="ps-searching">Erreur reseau</div>';
+  }
+}
+
+function psKeyNav(e){
+  var dd=document.getElementById("ps-dropdown");
+  if(!dd.classList.contains("open"))return;
+  var items=dd.querySelectorAll(".ps-item");
+  if(e.key==="ArrowDown"){e.preventDefault();psFocusIdx=Math.min(psFocusIdx+1,items.length-1);psHL(items)}
+  else if(e.key==="ArrowUp"){e.preventDefault();psFocusIdx=Math.max(psFocusIdx-1,0);psHL(items)}
+  else if(e.key==="Enter"){e.preventDefault();if(psFocusIdx>=0)psSelect(psFocusIdx)}
+  else if(e.key==="Escape")psClose();
+}
+
+function psHL(items){
+  items.forEach(function(el,i){
+    el.classList.toggle("focused",i===psFocusIdx);
+    if(i===psFocusIdx)el.scrollIntoView({block:"nearest"});
+  });
+}
+
+function psSelect(idx){
+  var item=psResults[idx];
+  if(!item)return;
+  psChosen=item;
+  var addrParts=[];
+  if(item.housenumber&&item.street)addrParts.push(item.housenumber+" "+item.street);
+  else if(item.street)addrParts.push(item.street);
+  if(item.postcode)addrParts.push(item.postcode);
+  if(item.city)addrParts.push(item.city);
+  var addr=addrParts.join(", ");
+  var val=item.housenumber&&item.street?(item.housenumber+" "+item.street+", "+item.postcode+" "+item.city):(item.name+(addr&&addr!==item.name?", "+addr:""));
+  var inp=document.getElementById("dest");
+  inp.value=val;
+  inp.dataset.lat=item.lat;
+  inp.dataset.lon=item.lng;
+  inp.dataset.fullAddr=addr||item.name;
+  inp.dataset.placeName=item.name;
+  document.getElementById("ps-confirmed-name").textContent=item.name;
+  document.getElementById("ps-confirmed-addr").textContent=addr;
+  document.getElementById("ps-confirmed").classList.add("show");
+  psClose();
+}
+
+function psClear(){
+  var inp=document.getElementById("dest");
+  inp.value="";inp.dataset.lat="";inp.dataset.lon="";inp.dataset.fullAddr="";inp.dataset.placeName="";
+  psChosen=null;
+  document.getElementById("ps-confirmed").classList.remove("show");
+  inp.focus();
+}
+
+function psClose(){
+  document.getElementById("ps-dropdown").classList.remove("open");
+  psFocusIdx=-1;
+}
+
+document.addEventListener("click",function(e){
+  if(!e.target.closest(".ps-wrap"))psClose();
+});
+
+async function geocode(addr){
+  var inp=document.getElementById("dest");
+  if(inp.dataset.lat&&inp.dataset.lon&&psChosen){
+    return{lat:parseFloat(inp.dataset.lat),lng:parseFloat(inp.dataset.lon),name:inp.dataset.placeName||addr};
+  }
+  try{
+    var r=await fetch("https://photon.komoot.io/api/?q="+encodeURIComponent(addr)+"&limit=1&lang=fr&bbox=-5.2,41.3,9.6,51.2");
+    var d=await r.json();
+    if(d.features&&d.features.length){
+      var f=d.features[0];
+      return{lat:f.geometry.coordinates[1],lng:f.geometry.coordinates[0],name:f.properties.name||addr};
+    }
+  }catch(e){}
+  var r2=await fetch("https://nominatim.openstreetmap.org/search?format=json&q="+encodeURIComponent(addr)+"&limit=1&countrycodes=fr",{headers:{"Accept-Language":"fr"}});
+  var d2=await r2.json();
+  if(!d2.length)throw new Error("Lieu introuvable");
+  return{lat:parseFloat(d2[0].lat),lng:parseFloat(d2[0].lon),name:addr};
+}
+
+async function geocodeRaw(addr){
+  try{
+    var r=await fetch("https://photon.komoot.io/api/?q="+encodeURIComponent(addr)+"&limit=1&lang=fr");
+    var d=await r.json();
+    if(d.features&&d.features.length){
+      var f=d.features[0];
+      return{lat:f.geometry.coordinates[1],lng:f.geometry.coordinates[0]};
+    }
+  }catch(e){}
+  var r2=await fetch("https://nominatim.openstreetmap.org/search?format=json&q="+encodeURIComponent(addr)+"&limit=1",{headers:{"Accept-Language":"fr"}});
+  var d2=await r2.json();
+  if(!d2.length)throw new Error("Adresse de depart introuvable");
+  return{lat:parseFloat(d2[0].lat),lng:parseFloat(d2[0].lon)};
+}
+
+async function getRoute(la1,ln1,la2,ln2){
+  var r=await fetch("https://router.project-osrm.org/route/v1/driving/"+ln1+","+la1+";"+ln2+","+la2+"?overview=full&geometries=geojson");
+  var d=await r.json();
+  if(d.code!=="Ok")throw new Error("Itineraire introuvable");
+  return{durationMin:Math.ceil(d.routes[0].duration/60),distanceKm:d.routes[0].distance/1000,geometry:d.routes[0].geometry};
+}
+
+async function calculate(){
+  var dest=document.getElementById("dest").value.trim();
+  if(!dest){
+    document.getElementById("dest-err").style.display="block";
+    document.getElementById("dest").focus();
+    return;
+  }
+  document.getElementById("dest-err").style.display="none";
+  var btn=document.getElementById("btn-calc");
+  btn.disabled=true;
+  document.getElementById("spin").classList.add("on");
+  document.getElementById("res-block").classList.remove("on");
+  try{
+    var depLat=AGENCY_LAT,depLng=AGENCY_LNG;
+    var depVal=document.getElementById("depart").value.trim();
+    if(depVal&&depVal!==DEFAULT_DEPART){
+      try{var dl=await geocodeRaw(depVal);depLat=dl.lat;depLng=dl.lng}catch(e){}
+    }
+    S.depLat=depLat;S.depLng=depLng;
+    var loc=await geocode(dest);
+    S.lat=loc.lat;S.lng=loc.lng;
+    var route=await getRoute(depLat,depLng,loc.lat,loc.lng);
+    S.driveMin=route.durationMin;
+    S.distKm=parseFloat(route.distanceKm.toFixed(1));
+    S.routeGeometry=route.geometry;
+    S.dest=dest;
+    S.placeInfo={name:loc.name,addr:document.getElementById("dest").dataset.fullAddr||dest,lat:loc.lat,lng:loc.lng};
+    S.eventStart=document.getElementById("event-start").value;
+    S.load=parseInt(document.getElementById("loading").value)||0;
+    S.meal=parseInt(document.getElementById("meal").value)||0;
+    S.install=parseInt(document.getElementById("install").value)||60;
+    S.margin=parseInt(document.getElementById("margin").value)||0;
+    var eventMin=parseMin(S.eventStart);
+    var total=S.driveMin+S.margin+S.load+S.meal+S.install;
+    var arrMin=eventMin-total;
+    S.arrivalTime=fmtTime(arrMin);
+    S.calculated=true;
+
+    document.getElementById("res-block").classList.add("on");
+    // Synchronous renders first
+    renderResults(arrMin,total,eventMin);
+    refreshCosts();
+    renderPlaceCard(loc,dest);
+    renderMaps(loc.lat,loc.lng,dest);
+    // Async fetches in parallel - launch immediately
+    loadRestaurants(loc.lat,loc.lng,dest);
+    loadPhotos(loc.lat,loc.lng,dest);
+    // France map - renders async but doesn't block
+    renderFranceMap(depLat,depLng,loc.lat,loc.lng,route.geometry,S.distKm,S.driveMin);
+    // Warning check - shows modal if needed
+    checkEarlyDeparture(arrMin);
+
+    setTimeout(function(){
+      document.getElementById("res-block").scrollIntoView({behavior:"smooth",block:"start"});
+    },120);
+  }catch(e){
+    alert("Erreur : "+e.message);
+  }finally{
+    btn.disabled=false;
+    document.getElementById("spin").classList.remove("on");
+  }
+}
+
+function renderFranceMap(depLat,depLng,destLat,destLng,geometry,distKm,driveMin){
+  document.getElementById("fm-dist").textContent=Math.round(distKm);
+  document.getElementById("fm-time").textContent=fmtDur(driveMin);
+
+  // Wait for the container to be visible & sized before initializing
+  var retries=0;
+  function init(){
+    retries++;
+    if(retries>20){return} // give up after 20 attempts (~5s)
+    var container=document.getElementById("france-map");
+    if(!container||container.offsetWidth<10){
+      return setTimeout(init,200);
+    }
+    if(typeof L==="undefined"){
+      return setTimeout(init,300);
+    }
+
+    if(franceMap){
+      try{franceMap.remove()}catch(e){}
+      franceMap=null;
+    }
+
+    franceMap=L.map("france-map",{
+      zoomControl:true,
+      scrollWheelZoom:false,
+      attributionControl:false,
+      preferCanvas:true
+    });
+
+    // Use OpenStreetMap France - reliable and shows French place names
+    L.tileLayer("https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png",{
+      maxZoom:18,
+      subdomains:["a","b","c"],
+      attribution:""
+    }).addTo(franceMap);
+
+    // Build route line from geometry
+    var coords=geometry.coordinates.map(function(c){return [c[1],c[0]]});
+
+    // Shadow line (darker, wider, behind)
+    L.polyline(coords,{color:"#000",weight:8,opacity:0.45,lineJoin:"round",lineCap:"round"}).addTo(franceMap);
+    // Main yellow line on top
+    var routeLine=L.polyline(coords,{color:"#FFD600",weight:5,opacity:1,lineJoin:"round",lineCap:"round"}).addTo(franceMap);
+
+    // Departure marker (yellow circle)
+    var depIcon=L.divIcon({
+      className:"",
+      html:'<div class="fmap-marker-dep"></div>',
+      iconSize:[20,20],
+      iconAnchor:[10,10]
+    });
+    // Destination marker (red pin)
+    var destIcon=L.divIcon({
+      className:"",
+      html:'<div class="fmap-marker-dest"></div>',
+      iconSize:[24,24],
+      iconAnchor:[12,12]
+    });
+
+    L.marker([depLat,depLng],{icon:depIcon,zIndexOffset:1000})
+      .addTo(franceMap)
+      .bindPopup('<div class="fmap-popup"><b>DEPART</b><br>Coquelles (62)</div>');
+
+    L.marker([destLat,destLng],{icon:destIcon,zIndexOffset:1100})
+      .addTo(franceMap)
+      .bindPopup('<div class="fmap-popup"><b>DESTINATION</b><br>'+Math.round(distKm)+' km &middot; '+fmtDur(driveMin)+'</div>')
+      .openPopup();
+
+    // Info badge near middle of route
+    if(coords.length>2){
+      var midIdx=Math.floor(coords.length/2);
+      var midPos=coords[midIdx];
+      var infoIcon=L.divIcon({
+        className:"",
+        html:'<div style="background:#fff;border:2px solid #111;border-radius:18px;padding:5px 11px;font-family:Outfit,sans-serif;font-size:11px;font-weight:700;color:#111;white-space:nowrap;box-shadow:0 3px 10px rgba(0,0,0,.4)">&#128663; '+fmtDur(driveMin)+' &middot; '+Math.round(distKm)+' km</div>',
+        iconSize:[140,28],
+        iconAnchor:[70,14]
+      });
+      L.marker(midPos,{icon:infoIcon,interactive:false,zIndexOffset:500}).addTo(franceMap);
+    }
+
+    // Fit bounds with padding
+    franceMap.fitBounds(routeLine.getBounds(),{padding:[50,50],maxZoom:10});
+
+    // Force resize after rendering
+    setTimeout(function(){
+      if(franceMap){franceMap.invalidateSize()}
+    },300);
+    setTimeout(function(){
+      if(franceMap){franceMap.invalidateSize()}
+    },800);
+  }
+
+  // Start init after DOM update
+  setTimeout(init,250);
+}
+
+function renderPlaceCard(loc,dest){
+  var pc=document.getElementById("place-card");
+  pc.classList.add("show");
+  var name=loc.name||(dest.split(",")[0]||"Lieu");
+  var addr=document.getElementById("dest").dataset.fullAddr||dest;
+  document.getElementById("place-name").textContent=name;
+  document.getElementById("place-type").textContent=psChosen&&psChosen.type?("Type : "+psChosen.type.replace(/_/g," ")):"Etablissement identifie";
+  document.getElementById("place-addr").textContent=addr;
+  document.getElementById("place-gps").textContent=loc.lat.toFixed(6)+", "+loc.lng.toFixed(6);
+  document.getElementById("place-dist").innerHTML="<strong>"+S.distKm+" km</strong> - environ "+fmtDur(S.driveMin)+" depuis l'agence";
+
+  // Generate Google Maps Place URL with multiple methods for best matching
+  var nameQ=encodeURIComponent(name);
+  var fullQ=encodeURIComponent(name+", "+addr);
+  var coords=loc.lat+","+loc.lng;
+
+  // Best Google Maps URL: combines name + coords for accurate identification
+  var googleUrl="https://www.google.com/maps/search/?api=1&query="+fullQ+"&query_place_id=";
+  // Alternative direct URL with coords
+  var googleUrlSimple="https://www.google.com/maps/place/"+nameQ+"/@"+loc.lat+","+loc.lng+",17z";
+  document.getElementById("link-google").href=googleUrlSimple;
+
+  // Recherche Google
+  document.getElementById("link-search").href="https://www.google.com/search?q="+fullQ;
+
+  // OpenStreetMap
+  document.getElementById("link-osm").href="https://www.openstreetmap.org/?mlat="+loc.lat+"&mlon="+loc.lng+"#map=18/"+loc.lat+"/"+loc.lng;
+
+  // Stars from rating (if available — we don't have it here but placeholder)
+  var ratingEl=document.getElementById("place-rating-wrap");
+  ratingEl.innerHTML='<a href="'+googleUrlSimple+'" target="_blank" style="background:#FFD600;color:#111;padding:7px 14px;border-radius:6px;font-family:Bebas Neue,sans-serif;font-size:13px;letter-spacing:2px;text-decoration:none">VOIR FICHE GOOGLE &rarr;</a>';
+}
+
+function copyPlaceLink(){
+  var url=document.getElementById("link-google").href;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(url).then(function(){
+      document.getElementById("copy-status").textContent="&#10003; Lien copie dans le presse-papiers";
+      document.getElementById("copy-status").innerHTML="&#10003; Lien copie dans le presse-papiers";
+      setTimeout(function(){document.getElementById("copy-status").textContent="Cliquer pour copier"},2500);
+    });
+  }else{
+    var t=document.createElement("textarea");t.value=url;document.body.appendChild(t);t.select();document.execCommand("copy");document.body.removeChild(t);
+    document.getElementById("copy-status").innerHTML="&#10003; Lien copie";
+    setTimeout(function(){document.getElementById("copy-status").textContent="Cliquer pour copier"},2500);
+  }
+}
+
+function renderResults(arrMin,total,eventMin){
+  document.getElementById("r-arrival").textContent=S.arrivalTime;
+  document.getElementById("r-arrival-sub").textContent="soit "+fmtDur(total)+" avant la prestation";
+  document.getElementById("r-drive").textContent=fmtDur(S.driveMin+S.margin)+(S.margin?" (incl. +"+fmtDur(S.margin)+")":"");
+  document.getElementById("r-dist").textContent=S.distKm+" km";
+  document.getElementById("r-load").textContent=fmtDur(S.load);
+  document.getElementById("r-margin").textContent=S.margin?"Incluse dans trajet":"-";
+  document.getElementById("r-meal").textContent=S.meal?fmtDur(S.meal):"-";
+  document.getElementById("r-install").textContent=fmtDur(S.install);
+  document.getElementById("r-event").textContent=S.eventStart;
+  document.getElementById("r-total").textContent=fmtDur(total);
+  var steps=[];var t=arrMin;
+  steps.push({t:fmtTime(t),l:"Arrivee bureau"});
+  if(S.load){t+=S.load;steps.push({t:fmtTime(t),l:"Fin chargement"})}
+  steps.push({t:fmtTime(t),l:"Depart agence"});
+  t+=S.driveMin+S.margin;
+  steps.push({t:fmtTime(t),l:"Arrivee site"});
+  if(S.meal){t+=S.meal;steps.push({t:fmtTime(t),l:"Fin repas"})}
+  t+=S.install;steps.push({t:fmtTime(t),l:"Fin install"});
+  steps.push({t:fmtTime(eventMin),l:"Debut prestation"});
+  var html="";
+  steps.forEach(function(s,i){
+    html+='<div class="tl-step"><div class="tl-top"><div class="tl-dot"></div>';
+    if(i<steps.length-1)html+='<div class="tl-line"></div>';
+    html+='</div><div class="tl-time">'+s.t+'</div><div class="tl-lbl">'+s.l+'</div></div>';
+  });
+  document.getElementById("timeline").innerHTML=html;
+}
+
+function renderMaps(lat,lng,dest){
+  var lF=lat.toFixed(6),lnF=lng.toFixed(6),enc=encodeURIComponent(dest);
+  document.getElementById("sat-link").href="https://www.google.com/maps/@"+lF+","+lnF+",18z/data=!3m1!1e3";
+  document.getElementById("sv-link").href="https://www.google.com/maps?q="+lF+","+lnF+"&layer=c&cbll="+lF+","+lnF;
+  document.getElementById("map-satellite").innerHTML='<iframe src="https://maps.google.com/maps?q='+enc+'&t=k&z=18&output=embed" style="width:100%;height:320px;border:none" frameborder="0" allowfullscreen loading="lazy"></iframe>';
+  document.getElementById("sv-container").innerHTML='<iframe src="https://maps.google.com/maps?q='+enc+'&layer=c&cbll='+lF+','+lnF+'&cbp=12,0,,0,0&z=17&output=svembed" style="width:100%;height:320px;border:none" frameborder="0" allowfullscreen loading="lazy"></iframe>';
+}
+
+async function loadPhotos(lat,lng,dest){
+  document.getElementById("photos-source").textContent="Recherche...";
+  document.getElementById("photos-inner").innerHTML='<div class="photos-spin"><div class="spinner"></div>Recherche de photos...</div>';
+  var photos=[];
+  try{
+    var r=await fetch("https://commons.wikimedia.org/w/api.php?action=query&list=geosearch&gscoord="+lat+"|"+lng+"&gsradius=500&gslimit=10&gsnamespace=6&format=json&origin=*");
+    var d=await r.json();
+    var pages=(d&&d.query&&d.query.geosearch)||[];
+    if(pages.length){
+      var titles=pages.slice(0,8).map(function(p){return p.title}).join("|");
+      var r2=await fetch("https://commons.wikimedia.org/w/api.php?action=query&titles="+encodeURIComponent(titles)+"&prop=imageinfo&iiprop=url&iiurlwidth=600&format=json&origin=*");
+      var d2=await r2.json();
+      Object.values((d2&&d2.query&&d2.query.pages)||{}).forEach(function(p){
+        if(p.imageinfo&&p.imageinfo[0]&&p.imageinfo[0].thumburl){
+          photos.push({thumb:p.imageinfo[0].thumburl,full:p.imageinfo[0].url});
+        }
+      });
+    }
+  }catch(e){}
+  try{
+    if(photos.length<3){
+      var r3=await fetch("https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=60286e29132c9cc6af58cf49b5de0c93&lat="+lat+"&lon="+lng+"&radius=0.5&format=json&nojsoncallback=1&per_page=6&sort=interestingness-desc&content_type=1");
+      var d3=await r3.json();
+      ((d3&&d3.photos&&d3.photos.photo)||[]).forEach(function(p){
+        photos.push({thumb:"https://live.staticflickr.com/"+p.server+"/"+p.id+"_"+p.secret+"_m.jpg",full:"https://live.staticflickr.com/"+p.server+"/"+p.id+"_"+p.secret+"_b.jpg"});
+      });
+    }
+  }catch(e){}
+  if(photos.length){
+    document.getElementById("photos-source").textContent=photos.length+" photo"+(photos.length>1?"s":"");
+    var html='<div class="photos-grid">';
+    photos.slice(0,8).forEach(function(p){
+      html+='<div class="photo-item" data-full="'+encodeURIComponent(p.full)+'"><img src="'+p.thumb+'" alt="photo" loading="lazy"></div>';
+    });
+    html+='</div>';
+    document.getElementById("photos-inner").innerHTML=html;
+  }else{
+    document.getElementById("photos-source").textContent="Aucune photo geolocalisee";
+    document.getElementById("photos-inner").innerHTML='<div style="background:#111;padding:16px 20px"><a href="https://www.google.com/search?q='+encodeURIComponent(dest)+'&tbm=isch" target="_blank" style="background:#FFD600;color:#111;padding:7px 14px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:700">Voir sur Google Images &rarr;</a></div>';
+  }
+}
+
+function openLightbox(src){document.getElementById("lb-img").src=src;document.getElementById("lightbox").classList.add("on")}
+function closeLightbox(){document.getElementById("lightbox").classList.remove("on")}
+document.addEventListener("click",function(e){
+  var pi=e.target.closest(".photo-item[data-full]");
+  if(pi)openLightbox(decodeURIComponent(pi.getAttribute("data-full")));
+});
+document.addEventListener("keydown",function(e){if(e.key==="Escape")closeLightbox()});
+
+function refreshCosts(){
+  if(!S.distKm)return;
+  var mult=parseInt(document.getElementById("trip-type").value)||2;
+  var fp=parseFloat(document.getElementById("fuel-price").value)||1.85;
+  var toll=parseFloat(document.getElementById("toll-input").value)||0;
+  var dist=S.distKm*mult;
+  document.getElementById("dist-label").textContent=dist.toFixed(1)+" km "+(mult===2?"(aller-retour)":"(aller simple)");
+  [{id:"light",c:8},{id:"6",c:12},{id:"12",c:16}].forEach(function(v){
+    var fuel=dist*v.c/100*fp;
+    var tot=fuel+toll*mult;
+    document.getElementById("f-"+v.id).textContent=fuel.toFixed(2)+" E";
+    document.getElementById("t-"+v.id).textContent=(toll*mult).toFixed(2)+" E";
+    document.getElementById("tot-"+v.id).textContent=tot.toFixed(2)+" E";
+  });
+}
+
+async function loadRestaurants(lat,lng,dest){
+  var wrap=document.getElementById("resto-wrap");
+  wrap.innerHTML='<div class="spin-row on" style="display:flex"><div class="spinner"></div>Recherche restaurants dans 5 km...</div>';
+  var meta=document.getElementById("resto-meta");
+  document.getElementById("resto-gmaps-link").href="https://www.google.com/maps/search/restaurant+pas+cher/@"+lat+","+lng+",14z";
+  document.getElementById("resto-ta-link").href="https://www.tripadvisor.fr/Search?q="+encodeURIComponent("restaurant "+dest);
+  meta.style.display="flex";
+
+  // Use AbortController so requests never hang forever
+  function fetchWithTimeout(url,opts,ms){
+    var ctrl=new AbortController();
+    var t=setTimeout(function(){ctrl.abort()},ms||10000);
+    return fetch(url,Object.assign({},opts,{signal:ctrl.signal})).finally(function(){clearTimeout(t)});
+  }
+
+  var items=[];
+  var q='[out:json][timeout:15];(node["amenity"~"restaurant|cafe|fast_food|bar|pub"]["name"](around:5000,'+lat+','+lng+');way["amenity"~"restaurant|cafe|fast_food|bar|pub"]["name"](around:5000,'+lat+','+lng+'););out center 40;';
+
+  // Race the two Overpass servers - whichever responds first wins
+  try{
+    var responses=await Promise.any([
+      fetchWithTimeout("https://overpass-api.de/api/interpreter",{method:"POST",body:"data="+encodeURIComponent(q)},12000).then(function(r){return r.json()}),
+      fetchWithTimeout("https://overpass.kumi.systems/api/interpreter",{method:"POST",body:"data="+encodeURIComponent(q)},12000).then(function(r){return r.json()}),
+      fetchWithTimeout("https://overpass.openstreetmap.fr/api/interpreter",{method:"POST",body:"data="+encodeURIComponent(q)},12000).then(function(r){return r.json()})
+    ]);
+    items=(responses.elements||[]).filter(function(e){return e.tags&&e.tags.name});
+  }catch(e){
+    // All Overpass servers failed, will try Photon below
+  }
+
+  if(items.length===0){
+    // Last resort: search via Photon for restaurants
+    try{
+      var r3=await fetch("https://photon.komoot.io/api/?q=restaurant&lat="+lat+"&lon="+lng+"&limit=15&lang=fr");
+      var d3=await r3.json();
+      if(d3.features){
+        items=d3.features.filter(function(f){
+          var p=f.properties;
+          return p.name&&(p.osm_value==="restaurant"||p.osm_value==="cafe"||p.osm_value==="fast_food"||p.osm_value==="bar");
+        }).map(function(f){
+          return {
+            tags:{name:f.properties.name,amenity:f.properties.osm_value,"addr:street":f.properties.street,"addr:housenumber":f.properties.housenumber,"addr:postcode":f.properties.postcode,"addr:city":f.properties.city},
+            lat:f.geometry.coordinates[1],
+            lon:f.geometry.coordinates[0]
+          };
+        });
+      }
+    }catch(e){}
+  }
+
+  if(items.length===0){
+    wrap.innerHTML='<div class="notice"><strong>Aucune donnee trouvee</strong> dans les bases ouvertes pour cette zone. Utilisez les liens rapides ci-dessus pour rechercher sur Google Maps ou TripAdvisor.</div>';
+    return;
+  }
+
+  // Filter for budget-friendly types and sort by distance
+  var budget=["fast_food","cafe","pub","bar"];
+  items=items.map(function(e){
+    var elat=e.lat||(e.center&&e.center.lat)||lat;
+    var elng=e.lon||(e.center&&e.center.lon)||lng;
+    var dist=Math.round(Math.sqrt(Math.pow((elat-lat)*111000,2)+Math.pow((elng-lng)*71500,2)));
+    var isBudget=budget.indexOf(e.tags.amenity)>=0;
+    return{
+      name:e.tags.name,
+      type:fmtRestoType(e.tags.amenity,e.tags.cuisine),
+      addr:fmtRestoAddr(e.tags),
+      dist:dist,
+      lat:elat,lng:elng,
+      phone:e.tags.phone||e.tags["contact:phone"]||"",
+      website:e.tags.website||e.tags["contact:website"]||"",
+      cuisine:e.tags.cuisine||"",
+      opening:e.tags.opening_hours||"",
+      isBudget:isBudget,
+      amenity:e.tags.amenity
+    };
+  });
+
+  // Sort: budget-friendly first, then by distance
+  items.sort(function(a,b){
+    if(a.isBudget!==b.isBudget)return a.isBudget?-1:1;
+    return a.dist-b.dist;
+  });
+
+  // Take top 5 (4-5 as requested)
+  var selected=items.slice(0,5);
+  S.restaurants=selected;
+  renderRestos(selected,dest);
+}
+
+function fmtRestoType(a,c){
+  var m={restaurant:"Restaurant",cafe:"Cafe",fast_food:"Restauration rapide",bar:"Bar",pub:"Pub"};
+  var t=m[a]||"Restaurant";
+  if(c){
+    var x=c.split(";")[0].trim();
+    var cm={pizza:"Pizzeria",burger:"Burger",french:"Cuisine francaise",chinese:"Chinois",italian:"Italien",kebab:"Kebab",sandwich:"Sandwicherie",sushi:"Sushi",indian:"Indien",thai:"Thai",vietnamese:"Vietnamien",mexican:"Mexicain",bakery:"Boulangerie",crepe:"Creperie",regional:"Regional"};
+    if(cm[x.toLowerCase()])t=cm[x.toLowerCase()];
+    else if(x)t+=" - "+x.charAt(0).toUpperCase()+x.slice(1);
+  }
+  return t;
+}
+
+function fmtRestoAddr(t){
+  var p=[];
+  if(t["addr:housenumber"]&&t["addr:street"])p.push(t["addr:housenumber"]+" "+t["addr:street"]);
+  else if(t["addr:street"])p.push(t["addr:street"]);
+  if(t["addr:postcode"])p.push(t["addr:postcode"]);
+  if(t["addr:city"])p.push(t["addr:city"]);
+  return p.join(", ")||"A proximite";
+}
+
+function renderRestos(list,dest){
+  if(!list.length){
+    document.getElementById("resto-wrap").innerHTML='<div class="notice">Aucun restaurant trouve.</div>';
+    return;
+  }
+  var html='<div class="notice" style="margin-bottom:14px"><strong>'+list.length+' restaurant'+(list.length>1?'s':'')+' selectionne'+(list.length>1?'s':'')+'</strong> dans 5 km - Tries par budget puis distance.</div><div class="resto-grid">';
+  list.forEach(function(r){
+    var name=r.name||"-";
+    var addr=r.addr||"";
+    var dist=fmtDist(r.dist);
+    var phone=r.phone||"";
+    var web=r.website||"";
+    var gmQ=r.lat&&r.lng?"https://www.google.com/maps?q="+r.lat+","+r.lng:"https://www.google.com/maps/search/"+encodeURIComponent(name+" "+addr);
+    var taQ="https://www.tripadvisor.fr/Search?q="+encodeURIComponent(name+" "+(addr.split(",").pop()||""));
+    html+='<div class="rc">';
+    html+='<div class="rc-name">'+name+'</div>';
+    html+='<div class="rc-cat">'+(r.type||"Restaurant")+'</div>';
+    html+='<div class="rc-addr">&#128205; '+addr+'</div>';
+    html+='<div class="rc-meta">';
+    html+='<span><strong>'+dist+'</strong> du lieu</span>';
+    if(phone)html+='<span>&#128222; <a href="tel:'+phone+'" style="color:#555;text-decoration:none">'+phone+'</a></span>';
+    html+='</div>';
+    if(r.opening)html+='<div style="font-size:10px;color:#888;margin-bottom:4px">&#128340; '+r.opening.substring(0,60)+'</div>';
+    html+='<div style="margin-top:8px"><span class="chip">Budget &le; 15E</span>';
+    if(r.isBudget)html+='<span class="chip" style="background:#2e7d32;color:#fff">Bon plan</span>';
+    html+='</div>';
+    html+='<div><a href="'+gmQ+'" target="_blank" class="rc-link maps">Google Maps &rarr;</a><a href="'+taQ+'" target="_blank" class="rc-link ta">TripAdvisor &rarr;</a>';
+    if(web)html+='<a href="'+web+'" target="_blank" class="rc-link" style="background:#111;color:#FFD600">Site web &rarr;</a>';
+    html+='</div></div>';
+  });
+  html+='</div>';
+  document.getElementById("resto-wrap").innerHTML=html;
+}
+
+function exportPDF(){
+  if(!S.calculated){alert("Calculez d'abord un trajet.");return}
+  var fp=parseFloat(document.getElementById("fuel-price").value)||1.85;
+  var mult=parseInt(document.getElementById("trip-type").value)||2;
+  var toll=parseFloat(document.getElementById("toll-input").value)||0;
+  var dist=S.distKm*mult;
+  var vs=[{n:"Vehicule Leger",c:8},{n:"Fourgon 6 m2",c:12},{n:"Fourgon 12 m2",c:16}];
+  var vRows="";
+  vs.forEach(function(v){
+    var f=(dist*v.c/100*fp).toFixed(2);
+    var tot=(parseFloat(f)+toll*mult).toFixed(2);
+    vRows+="<tr><td>"+v.n+"</td><td>"+f+" E</td><td>"+(toll*mult).toFixed(2)+" E</td><td><strong>"+tot+" E</strong></td></tr>";
+  });
+  var restoRows="";
+  S.restaurants.slice(0,5).forEach(function(r){
+    restoRows+="<tr><td>"+(r.name||"-")+"</td><td>"+(r.type||"-")+"</td><td>"+(r.addr||"-")+"</td><td>"+fmtDist(r.dist||0)+"</td></tr>";
+  });
+  var w=window.open("","_blank","width=950,height=800");
+  var dateStr=new Date().toLocaleDateString("fr-FR",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+  var timeStr=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+  var googleLink=document.getElementById("link-google").href;
+  var doc='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>2ISD - Fiche</title>';
+  doc+='<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;padding:36px;color:#111;font-size:12px}';
+  doc+='.logo{font-size:36px;font-weight:900;color:#FFD600;letter-spacing:5px;text-shadow:2px 2px 0 #000}.logo b{color:#000}';
+  doc+='.sub{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:24px;display:block}';
+  doc+='h2{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#111;border-left:4px solid #FFD600;padding-left:10px;margin:20px 0 10px}';
+  doc+='.hero{background:#111;border-radius:10px;padding:18px 24px;text-align:center;margin-bottom:20px}';
+  doc+='.hl{font-size:9px;color:#666;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}';
+  doc+='.hv{font-size:48px;font-weight:900;color:#FFD600;letter-spacing:5px}';
+  doc+='.hs{font-size:10px;color:#555;margin-top:4px}';
+  doc+='table{width:100%;border-collapse:collapse;margin-top:6px}';
+  doc+='th{background:#111;color:#FFD600;padding:7px 10px;text-align:left;font-size:9px;letter-spacing:1px;text-transform:uppercase}';
+  doc+='td{padding:7px 10px;border-bottom:1px solid #eee}tr:nth-child(even) td{background:#fafafa}';
+  doc+='.footer{margin-top:28px;font-size:9px;color:#aaa;border-top:1px solid #eee;padding-top:10px;text-align:center}';
+  doc+='@media print{body{padding:18px}}</style></head><body>';
+  doc+='<div class="logo">2<b>ISD</b></div>';
+  doc+='<span class="sub">Planificateur - '+dateStr+'</span>';
+  doc+='<div class="hero"><div class="hl">Heure d\'arrivee au bureau</div><div class="hv">'+S.arrivalTime+'</div><div class="hs">soit '+fmtDur(S.driveMin+S.margin+S.load+S.meal+S.install)+' avant la prestation</div></div>';
+  doc+='<h2>Lieu de Prestation</h2><table>';
+  doc+='<tr><td><strong>Nom</strong></td><td>'+(S.placeInfo&&S.placeInfo.name||S.dest)+'</td></tr>';
+  doc+='<tr><td><strong>Adresse</strong></td><td>'+S.dest+'</td></tr>';
+  doc+='<tr><td><strong>GPS</strong></td><td>'+S.lat.toFixed(6)+', '+S.lng.toFixed(6)+'</td></tr>';
+  doc+='<tr><td><strong>Fiche Google Maps</strong></td><td><a href="'+googleLink+'">'+googleLink.substring(0,60)+'...</a></td></tr>';
+  doc+='</table>';
+  doc+='<h2>Detail du Trajet</h2><table>';
+  doc+='<tr><td>Adresse de depart</td><td>'+document.getElementById("depart").value+'</td></tr>';
+  doc+='<tr><td>Distance</td><td>'+S.distKm+' km</td></tr>';
+  doc+='<tr><td>Trajet estime</td><td>'+fmtDur(S.driveMin+S.margin)+'</td></tr>';
+  doc+='<tr><td>Chargement</td><td>'+fmtDur(S.load)+'</td></tr>';
+  doc+='<tr><td>Repas</td><td>'+(S.meal?fmtDur(S.meal):"Non")+'</td></tr>';
+  doc+='<tr><td>Installation</td><td>'+fmtDur(S.install)+'</td></tr>';
+  doc+='<tr><td>Debut prestation</td><td>'+S.eventStart+'</td></tr></table>';
+  doc+='<h2>Frais de Route - '+(mult===2?"Aller-Retour":"Aller simple")+' ('+dist.toFixed(1)+' km)</h2>';
+  doc+='<table><tr><th>Vehicule</th><th>Carburant ('+fp+'E/L)</th><th>Peages</th><th>Total</th></tr>'+vRows+'</table>';
+  if(restoRows){
+    doc+='<h2>Restaurants Selectionnes (5 km - &le;15E)</h2><table><tr><th>Restaurant</th><th>Type</th><th>Adresse</th><th>Distance</th></tr>'+restoRows+'</table>';
+  }
+  doc+='<div class="footer">2ISD - '+timeStr+' - Estimations indicatives</div>';
+  doc+='<scr'+'ipt>window.onload=function(){setTimeout(function(){window.print()},500)}</scr'+'ipt>';
+  doc+='</body></html>';
+  w.document.write(doc);
+  w.document.close();
+}
+</script>
+</body>
+</html>
