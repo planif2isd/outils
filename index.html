@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2ISD - Outils</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:Outfit,sans-serif;background:linear-gradient(135deg,#111 0%,#1a1a1a 100%);color:#111;min-height:100vh;display:flex;flex-direction:column}
+
+.navbar{background:#111;padding:20px 40px;box-shadow:0 2px 24px rgba(0,0,0,.3);position:sticky;top:0;z-index:100}
+.navbar-content{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:Bebas Neue,sans-serif;font-size:32px;color:#FFD600;letter-spacing:3px}
+.logo b{color:#fff}
+.nav-links{display:flex;gap:30px;align-items:center}
+.nav-links a{color:#FFD600;text-decoration:none;font-weight:600;transition:.3s;font-size:14px}
+.nav-links a:hover{opacity:.8}
+
+.hero{text-align:center;padding:80px 40px;color:#fff;flex:1;display:flex;flex-direction:column;justify-content:center}
+.hero h1{font-family:Bebas Neue,sans-serif;font-size:64px;letter-spacing:5px;margin-bottom:20px;line-height:1.2}
+.hero h1 span{color:#FFD600}
+.hero p{font-size:18px;color:#ccc;margin-bottom:40px;max-width:700px;margin-left:auto;margin-right:auto;line-height:1.6}
+
+.tools-grid{max-width:1200px;margin:0 auto;padding:60px 40px;width:100%;display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:40px}
+
+.tool-card{background:#fff;border-radius:14px;overflow:hidden;border-left:5px solid #FFD600;box-shadow:0 10px 40px rgba(0,0,0,.2);transition:all .3s;text-decoration:none;color:#111;display:flex;flex-direction:column;height:100%}
+.tool-card:hover{transform:translateY(-5px);box-shadow:0 15px 50px rgba(255,214,0,.3)}
+
+.tool-card-header{background:linear-gradient(135deg,#FFD600 0%,#e6c200 100%);padding:30px 20px;text-align:center}
+.tool-card-icon{font-size:48px;margin-bottom:10px}
+.tool-card-title{font-family:Bebas Neue,sans-serif;font-size:24px;letter-spacing:2px;color:#111}
+
+.tool-card-body{padding:30px 20px;flex:1;display:flex;flex-direction:column}
+.tool-card-description{font-size:14px;color:#555;line-height:1.6;margin-bottom:20px;flex:1}
+
+.tool-features{margin:20px 0;padding:20px 0;border-top:1px solid #e8e8e8;border-bottom:1px solid #e8e8e8}
+.tool-feature{font-size:12px;color:#777;margin:8px 0;display:flex;align-items:center}
+.tool-feature::before{content:'✓';color:#FFD600;font-weight:bold;margin-right:8px;font-size:14px}
+
+.tool-card-footer{display:flex;gap:10px;padding:20px;background:#f6f6f4}
+.btn{flex:1;padding:12px 20px;border-radius:8px;border:none;font-family:Bebas Neue,sans-serif;font-size:14px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:.3s;text-decoration:none;text-align:center;display:inline-block}
+.btn-primary{background:#FFD600;color:#111;box-shadow:0 4px 0 #111}
+.btn-primary:hover{background:#e6c200;transform:translate(-1px,-1px);box-shadow:0 5px 0 #111}
+.btn-primary:active{transform:translate(1px,1px);box-shadow:0 2px 0 #111}
+
+.btn-secondary{background:#111;color:#FFD600;border:2px solid #FFD600}
+.btn-secondary:hover{background:#FFD600;color:#111}
+
+.footer{background:#111;padding:30px 40px;text-align:center;color:#666;border-top:1px solid #222;margin-top:auto}
+.footer p{font-size:12px}
+
+@media(max-width:780px){
+  .hero h1{font-size:40px}
+  .tools-grid{grid-template-columns:1fr;padding:40px 20px}
+  .navbar-content{flex-direction:column;gap:20px;text-align:center}
+  .hero{padding:50px 20px}
+}
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-content">
+    <div class="logo">2<b>ISD</b></div>
+    <div class="nav-links">
+      <a href="#tools">Outils</a>
+      <a href="https://www.2isd.com" target="_blank">Site 2ISD</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <h1>Bienvenue sur <span>2ISD</span></h1>
+  <p>Découvrez nos outils professionnels pour optimiser vos prestations événementielles et gérer efficacement vos activités</p>
+</div>
+
+<div class="tools-grid" id="tools">
+  
+  <!-- Outil 1: Planificateur -->
+  <a href="1.html" class="tool-card" style="text-decoration:none;color:inherit">
+    <div class="tool-card-header">
+      <div class="tool-card-icon">📋</div>
+      <div class="tool-card-title">Planificateur</div>
+    </div>
+    <div class="tool-card-body">
+      <p class="tool-card-description">Calculez vos trajets, horaires et frais de route en temps réel. Optimisez vos prestations avec un calcul précis des itinéraires et des coûts.</p>
+      <div class="tool-features">
+        <div class="tool-feature">Calcul d'itinéraires précis</div>
+        <div class="tool-feature">Estimation des frais de route</div>
+        <div class="tool-feature">Restauration à proximité</div>
+        <div class="tool-feature">Vue d'ensemble France</div>
+        <div class="tool-feature">Export en PDF</div>
+      </div>
+    </div>
+    <div class="tool-card-footer">
+      <button class="btn btn-primary" onclick="window.open('1.html');return false">Accéder →</button>
+    </div>
+  </a>
+
+  <!-- Outil 2: Configurateur -->
+  <a href="2.html" class="tool-card" style="text-decoration:none;color:inherit">
+    <div class="tool-card-header">
+      <div class="tool-card-icon">⚙️</div>
+      <div class="tool-card-title">Configurateur</div>
+    </div>
+    <div class="tool-card-body">
+      <p class="tool-card-description">Configurez vos activités événementielles avec précision. Générez des fiches détaillées avec tous les paramètres nécessaires.</p>
+      <div class="tool-features">
+        <div class="tool-feature">Sélection d'activités</div>
+        <div class="tool-feature">Paramètres personnalisables</div>
+        <div class="tool-feature">Préconisations intégrées</div>
+        <div class="tool-feature">Fiche complète générée</div>
+        <div class="tool-feature">Export PDF optimisé</div>
+      </div>
+    </div>
+    <div class="tool-card-footer">
+      <button class="btn btn-primary" onclick="window.open('2.html');return false">Accéder →</button>
+    </div>
+  </a>
+
+</div>
+
+<footer class="footer">
+  <p>&copy; 2026 2ISD - Planificateur de Prestation Événementielle</p>
+  <p>Tous les outils sont optimisés pour faciliter votre gestion de projet</p>
+</footer>
+
+</body>
+</html>
