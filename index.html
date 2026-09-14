@@ -2,130 +2,1139 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2ISD - Outils</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Rotation — Planning Team Building</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{font-family:Outfit,sans-serif;background:linear-gradient(135deg,#111 0%,#1a1a1a 100%);color:#111;min-height:100vh;display:flex;flex-direction:column}
-
-.navbar{background:#111;padding:20px 40px;box-shadow:0 2px 24px rgba(0,0,0,.3);position:sticky;top:0;z-index:100}
-.navbar-content{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
-.logo{font-family:Bebas Neue,sans-serif;font-size:32px;color:#FFD600;letter-spacing:3px}
-.logo b{color:#fff}
-.nav-links{display:flex;gap:30px;align-items:center}
-.nav-links a{color:#FFD600;text-decoration:none;font-weight:600;transition:.3s;font-size:14px}
-.nav-links a:hover{opacity:.8}
-
-.hero{text-align:center;padding:80px 40px;color:#fff;flex:1;display:flex;flex-direction:column;justify-content:center}
-.hero h1{font-family:Bebas Neue,sans-serif;font-size:64px;letter-spacing:5px;margin-bottom:20px;line-height:1.2}
-.hero h1 span{color:#FFD600}
-.hero p{font-size:18px;color:#ccc;margin-bottom:40px;max-width:700px;margin-left:auto;margin-right:auto;line-height:1.6}
-
-.tools-grid{max-width:1200px;margin:0 auto;padding:60px 40px;width:100%;display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:40px}
-
-.tool-card{background:#fff;border-radius:14px;overflow:hidden;border-left:5px solid #FFD600;box-shadow:0 10px 40px rgba(0,0,0,.2);transition:all .3s;text-decoration:none;color:#111;display:flex;flex-direction:column;height:100%}
-.tool-card:hover{transform:translateY(-5px);box-shadow:0 15px 50px rgba(255,214,0,.3)}
-
-.tool-card-header{background:linear-gradient(135deg,#FFD600 0%,#e6c200 100%);padding:30px 20px;text-align:center}
-.tool-card-icon{font-size:48px;margin-bottom:10px}
-.tool-card-title{font-family:Bebas Neue,sans-serif;font-size:24px;letter-spacing:2px;color:#111}
-
-.tool-card-body{padding:30px 20px;flex:1;display:flex;flex-direction:column}
-.tool-card-description{font-size:14px;color:#555;line-height:1.6;margin-bottom:20px;flex:1}
-
-.tool-features{margin:20px 0;padding:20px 0;border-top:1px solid #e8e8e8;border-bottom:1px solid #e8e8e8}
-.tool-feature{font-size:12px;color:#777;margin:8px 0;display:flex;align-items:center}
-.tool-feature::before{content:'✓';color:#FFD600;font-weight:bold;margin-right:8px;font-size:14px}
-
-.tool-card-footer{display:flex;gap:10px;padding:20px;background:#f6f6f4}
-.btn{flex:1;padding:12px 20px;border-radius:8px;border:none;font-family:Bebas Neue,sans-serif;font-size:14px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:.3s;text-decoration:none;text-align:center;display:inline-block}
-.btn-primary{background:#FFD600;color:#111;box-shadow:0 4px 0 #111}
-.btn-primary:hover{background:#e6c200;transform:translate(-1px,-1px);box-shadow:0 5px 0 #111}
-.btn-primary:active{transform:translate(1px,1px);box-shadow:0 2px 0 #111}
-
-.btn-secondary{background:#111;color:#FFD600;border:2px solid #FFD600}
-.btn-secondary:hover{background:#FFD600;color:#111}
-
-.footer{background:#111;padding:30px 40px;text-align:center;color:#666;border-top:1px solid #222;margin-top:auto}
-.footer p{font-size:12px}
-
-@media(max-width:780px){
-  .hero h1{font-size:40px}
-  .tools-grid{grid-template-columns:1fr;padding:40px 20px}
-  .navbar-content{flex-direction:column;gap:20px;text-align:center}
-  .hero{padding:50px 20px}
-}
+  :root{
+    --bg:#0E1116;
+    --surface:#161B22;
+    --surface-2:#1D2530;
+    --surface-3:#252F3C;
+    --border:#2B3542;
+    --text:#F2F4F7;
+    --text-dim:#8B93A1;
+    --text-faint:#5C6675;
+    --accent:#FFB020;
+    --accent-ink:#1A1300;
+    --accent-2:#22D3AA;
+    --danger:#EF4C54;
+    --radius:14px;
+    --radius-sm:9px;
+    --shadow:0 8px 24px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1100px 500px at 15% -10%, rgba(255,176,32,.09), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgba(34,211,170,.07), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  #app{max-width:920px;margin:0 auto;padding:18px 16px 100px;}
+  .h1{font-size:26px;font-weight:800;letter-spacing:.2px;margin:0 0 4px;}
+  .h2{font-size:12px;font-weight:800;letter-spacing:2.2px;text-transform:uppercase;color:var(--accent);margin:0 0 10px;}
+  .sub{color:var(--text-dim);font-size:14.5px;line-height:1.5;margin:0 0 18px;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:22px;padding-top:4px;}
+  .brand{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;}
+  .brand .mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(145deg,var(--accent),#FF8A20);display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--accent-ink);font-size:16px;box-shadow:0 4px 14px rgba(255,176,32,.35);transform:rotate(-4deg);}
+  .brand .name{font-weight:800;font-size:16px;letter-spacing:.3px;}
+  .brand .tag{font-size:11px;color:var(--text-faint);letter-spacing:1px;text-transform:uppercase;margin-top:-2px;}
+  .pill{display:inline-flex;align-items:center;gap:6px;background:var(--surface-2);border:1px solid var(--border);padding:6px 12px;border-radius:999px;font-size:12.5px;color:var(--text-dim);}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px;box-shadow:var(--shadow);}
+  .card.tight{padding:14px;}
+  .row{display:flex;gap:10px;flex-wrap:wrap;}
+  .col{flex:1;min-width:160px;}
+  label.field-label{display:block;font-size:12px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+  input[type=text],input[type=number],input[type=date],input[type=time],select{width:100%;background:var(--surface-2);border:1px solid var(--border);color:var(--text);padding:11px 12px;border-radius:var(--radius-sm);font-size:15px;outline:none;transition:border-color .15s;}
+  input[type=text]:focus,input[type=number]:focus,input[type=date]:focus,input[type=time]:focus,select:focus{border-color:var(--accent);}
+  input[type=color]{width:44px;height:40px;border-radius:9px;border:1px solid var(--border);background:var(--surface-2);padding:2px;cursor:pointer;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--surface-3);border:1px solid var(--border);color:var(--text);padding:12px 18px;border-radius:var(--radius-sm);font-size:14.5px;font-weight:700;cursor:pointer;transition:.15s;white-space:nowrap;}
+  .btn:hover{border-color:#3A4656;background:#2A3644;}
+  .btn:active{transform:scale(.98);}
+  .btn.primary{background:linear-gradient(145deg,var(--accent),#FF9A1F);color:var(--accent-ink);border:none;box-shadow:0 6px 18px rgba(255,176,32,.28);}
+  .btn.primary:hover{filter:brightness(1.05);}
+  .btn.primary:disabled{opacity:.4;cursor:not-allowed;filter:none;box-shadow:none;}
+  .btn.ghost{background:transparent;border:1px solid var(--border);}
+  .btn.danger{background:transparent;border:1px solid rgba(239,76,84,.5);color:var(--danger);}
+  .btn.sm{padding:8px 12px;font-size:13px;}
+  .btn.block{width:100%;}
+  .btn.teal{background:linear-gradient(145deg,var(--accent-2),#17A98A);color:#052E26;border:none;}
+  .stepper{display:flex;gap:6px;margin-bottom:20px;}
+  .step-dot{flex:1;height:4px;border-radius:3px;background:var(--border);}
+  .step-dot.done{background:var(--accent-2);}
+  .step-dot.active{background:var(--accent);}
+  .team-row,.epreuve-row{display:flex;align-items:center;gap:10px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 10px;margin-bottom:8px;}
+  .team-row input[type=text]{flex:1;background:transparent;border:none;padding:6px 2px;font-size:14.5px;}
+  .team-row input[type=text]:focus{outline:none;}
+  .idx-badge{width:26px;height:26px;border-radius:7px;background:var(--surface-3);color:var(--text-dim);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex:none;}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:var(--surface-2);border:1px solid var(--border);padding:5px 10px 5px 6px;border-radius:999px;font-size:13px;font-weight:600;}
+  .dot{width:10px;height:10px;border-radius:50%;flex:none;}
+  .grid-wrap{overflow-x:auto;border-radius:var(--radius-sm);border:1px solid var(--border);}
+  table.plan{border-collapse:collapse;width:100%;min-width:560px;}
+  table.plan th,table.plan td{border:1px solid var(--border);padding:8px;vertical-align:top;font-size:13px;}
+  table.plan th{background:var(--surface-2);text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--text-dim);position:sticky;top:0;}
+  table.plan td:first-child,table.plan th:first-child{position:sticky;left:0;background:var(--surface-2);z-index:1;font-weight:700;}
+  .group-cell{display:flex;flex-direction:column;gap:4px;}
+  .tabs{display:flex;gap:6px;margin-bottom:16px;background:var(--surface-2);padding:4px;border-radius:12px;border:1px solid var(--border);overflow-x:auto;}
+  .tab{flex:1;text-align:center;padding:9px 8px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;color:var(--text-dim);white-space:nowrap;}
+  .tab.active{background:var(--surface-3);color:var(--text);}
+  .code-box{background:var(--surface-2);border:1.5px dashed var(--border);border-radius:var(--radius-sm);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;}
+  .code-box .code{font-size:20px;font-weight:900;letter-spacing:4px;color:var(--accent);}
+  .code-box .lbl{font-size:12.5px;color:var(--text-dim);font-weight:600;}
+  .empty{text-align:center;padding:40px 20px;color:var(--text-faint);}
+  .empty .big{font-size:34px;margin-bottom:8px;}
+  .live-dot{width:8px;height:8px;border-radius:50%;background:var(--accent-2);display:inline-block;box-shadow:0 0 0 0 rgba(34,211,170,.6);animation:pulse 1.6s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(34,211,170,.55);}70%{box-shadow:0 0 0 8px rgba(34,211,170,0);}100%{box-shadow:0 0 0 0 rgba(34,211,170,0);}}
+  .team-tap{display:flex;align-items:center;gap:10px;background:var(--surface-2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;}
+  .lb-row{display:flex;align-items:center;gap:12px;padding:12px 8px;border-bottom:1px solid var(--border);}
+  .lb-row:last-child{border-bottom:none;}
+  .lb-rank{width:30px;font-weight:900;font-size:16px;color:var(--text-dim);text-align:center;flex:none;}
+  .lb-rank.top1{color:var(--accent);font-size:19px;}
+  .lb-bar-wrap{flex:1;}
+  .lb-name{font-weight:700;font-size:14.5px;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+  .lb-bar-bg{height:8px;background:var(--surface-2);border-radius:5px;overflow:hidden;}
+  .lb-bar{height:100%;border-radius:5px;transition:width .4s;}
+  .lb-pts{font-weight:900;font-size:17px;min-width:52px;text-align:right;flex:none;}
+  .foot-note{font-size:12px;color:var(--text-faint);text-align:center;margin-top:22px;line-height:1.6;}
+  .back-link{display:inline-flex;align-items:center;gap:6px;color:var(--text-dim);cursor:pointer;font-size:13.5px;margin-bottom:14px;font-weight:600;}
+  .back-link:hover{color:var(--text);}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--surface-3);border:1px solid var(--border);color:var(--text);padding:12px 20px;border-radius:999px;font-size:13.5px;font-weight:600;box-shadow:var(--shadow);z-index:999;}
+  .divider{height:1px;background:var(--border);margin:16px 0;}
+  .kv{display:flex;justify-content:space-between;font-size:13.5px;padding:6px 0;color:var(--text-dim);}
+  .kv b{color:var(--text);}
+  .rest-tag{font-size:11px;color:var(--text-faint);background:var(--surface-3);padding:3px 8px;border-radius:6px;}
+  ::placeholder{color:var(--text-faint);}
+  .spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.25);border-top-color:var(--accent-ink);animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .photo-thumb{width:44px;height:44px;object-fit:cover;border-radius:8px;border:1px solid var(--border);}
+  .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;}
+  .gallery-grid a img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;border:1px solid var(--border);display:block;}
+  details.card summary::-webkit-details-marker{display:none;}
+  details.card summary{list-style:none;}
+  @media (max-width:520px){ .h1{font-size:22px;} #app{padding:14px 12px 90px;} }
 </style>
 </head>
 <body>
+<div id="app"><div style="text-align:center;padding:60px 20px;color:#8B93A1;">Chargement…</div></div>
 
-<nav class="navbar">
-  <div class="navbar-content">
-    <div class="logo">2<b>ISD</b></div>
-    <div class="nav-links">
-      <a href="#tools">Outils</a>
-      <a href="https://www.2isd.com" target="_blank">Site 2ISD</a>
+<script>
+/* ============================= FIREBASE CONFIG ============================= */
+/* Remplace ces valeurs par celles de ton projet Firebase :
+   Console Firebase > Paramètres du projet > Vos applications > icône Web </> */
+const firebaseConfig = {
+  apiKey: "REMPLACE_MOI",
+  authDomain: "REMPLACE_MOI.firebaseapp.com",
+  projectId: "REMPLACE_MOI",
+  storageBucket: "REMPLACE_MOI",
+  messagingSenderId: "REMPLACE_MOI",
+  appId: "REMPLACE_MOI"
+};
+
+let db = null, storage = null, firebaseReady = false;
+
+function showConfigNeeded(){
+  document.getElementById('app').innerHTML = `
+    <div style="max-width:480px;margin:60px auto;text-align:center;padding:0 16px;">
+      <div style="font-size:44px;margin-bottom:10px;">🔧</div>
+      <h2 style="margin-bottom:8px;">Configuration Firebase requise</h2>
+      <p style="color:#8B93A1;line-height:1.6;">
+        Ouvre ce fichier HTML dans un éditeur, cherche <code>firebaseConfig</code> tout en haut du script,
+        et remplace les valeurs <b>REMPLACE_MOI</b> par celles de ton projet Firebase
+        (Console Firebase → Paramètres du projet → Vos applications → icône Web).
+      </p>
+    </div>`;
+}
+
+try{
+  if(firebaseConfig.apiKey === "REMPLACE_MOI"){
+    showConfigNeeded();
+  } else {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    storage = firebase.storage();
+    firebaseReady = true;
+  }
+}catch(e){
+  console.error(e);
+  showConfigNeeded();
+}
+
+/* ============================= DATA LAYER (Firestore + Storage) ============================= */
+async function getEvent(id){
+  const doc = await db.collection('events').doc(id).get();
+  return doc.exists ? doc.data() : null;
+}
+async function setEvent(id, data){
+  await db.collection('events').doc(id).set(data);
+}
+async function listEvents(max=25){
+  const snap = await db.collection('events').orderBy('createdAt','desc').limit(max).get();
+  return snap.docs.map(d=>d.data());
+}
+async function getCodeInfo(code){
+  const doc = await db.collection('codes').doc(code).get();
+  return doc.exists ? doc.data() : null;
+}
+async function registerCodes(eventId, codes){
+  const batch = db.batch();
+  batch.set(db.collection('codes').doc(codes.admin), { eventId, role:'admin' });
+  batch.set(db.collection('codes').doc(codes.public), { eventId, role:'public' });
+  Object.entries(codes.epreuves).forEach(([epId,code])=>{
+    batch.set(db.collection('codes').doc(code), { eventId, role:'animateur', epreuveId: epId });
+  });
+  await batch.commit();
+}
+async function getScores(eventId, epId){
+  const doc = await db.collection('scores').doc(eventId+'__'+epId).get();
+  return doc.exists ? (doc.data().rounds || {}) : {};
+}
+async function saveRoundScoreData(eventId, epId, roundIndex, raw){
+  const ref = db.collection('scores').doc(eventId+'__'+epId);
+  const update = {}; update['rounds.'+roundIndex] = raw; update.eventId = eventId; update.epreuveId = epId; update.updatedAt = Date.now();
+  await ref.set(update, { merge:true });
+}
+async function clearScores(eventId, epId){
+  await db.collection('scores').doc(eventId+'__'+epId).delete();
+}
+async function uploadPhoto(eventId, file, meta={}){
+  const id = uid('ph');
+  const ext = ((file.name||'jpg').split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'') || 'jpg';
+  const type = meta.type || 'gallery';
+  const path = `events/${eventId}/${type}/${id}.${ext}`;
+  const ref = storage.ref().child(path);
+  await ref.put(file);
+  const url = await ref.getDownloadURL();
+  const doc = {
+    id, eventId, type, url, path,
+    epreuveId: meta.epreuveId || null,
+    roundIndex: (meta.roundIndex!==undefined && meta.roundIndex!==null) ? meta.roundIndex : null,
+    caption: meta.caption || '',
+    createdAt: Date.now()
+  };
+  await db.collection('photos').doc(id).set(doc);
+  return doc;
+}
+async function getEventPhotos(eventId){
+  const snap = await db.collection('photos').where('eventId','==',eventId).get();
+  return snap.docs.map(d=>d.data()).sort((a,b)=> b.createdAt - a.createdAt);
+}
+function pickAndUpload(eventId, meta, onDone){
+  const input = document.createElement('input');
+  input.type='file'; input.accept='image/*'; input.setAttribute('capture','environment');
+  input.onchange = async ()=>{
+    const file = input.files[0];
+    if(!file) return;
+    toast('Envoi de la photo…');
+    try{
+      const doc = await uploadPhoto(eventId, file, meta);
+      toast('Photo enregistrée ✓');
+      if(onDone) onDone(doc);
+    }catch(e){
+      console.error(e);
+      toast("Échec de l'envoi de la photo.");
+    }
+  };
+  input.click();
+}
+
+/* ============================= UTIL ============================= */
+function uid(prefix){ return prefix+'_'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function genCode(len=5){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let c=''; for(let i=0;i<len;i++) c+=chars[Math.floor(Math.random()*chars.length)];
+  return c;
+}
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function esc(s){ return (s||'').toString().replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function fmtDate(d){ if(!d) return ''; try{ const dt=new Date(d); return dt.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'}); }catch(e){return d;} }
+
+const BASE_PALETTE = [
+  '#E63946','#1D4ED8','#16A34A','#F5B301','#7C3AED','#F97316','#EC4899','#06B6D4',
+  '#92400E','#64748B','#14B8A6','#4338CA','#DC2626','#0EA5E9','#65A30D','#DB2777'
+];
+function colorForIndex(i){
+  if(i < BASE_PALETTE.length) return BASE_PALETTE[i];
+  const hue = (i*47) % 360;
+  return `hsl(${hue} 70% 50%)`;
+}
+function toast(msg){
+  const t=document.createElement('div');
+  t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 2200);
+}
+async function copyToClipboard(text){
+  try{ await navigator.clipboard.writeText(text); toast('Copié : '+text); }
+  catch(e){ toast('Code : '+text); }
+}
+
+/* ============================= SCHEDULING ENGINE ============================= */
+function pairKey(a,b){ return a<b ? a+'|'+b : b+'|'+a; }
+function computeGroupSizes(N, K, gMin, gMax){
+  let activeK = K;
+  while(activeK>1 && gMin*activeK > N) activeK--;
+  let base = Math.floor(N/activeK);
+  base = Math.max(gMin, Math.min(gMax, base));
+  let sizes = new Array(activeK).fill(base);
+  let total = base*activeK;
+  let remainder = N-total;
+  let i=0, guard=0;
+  while(remainder>0 && guard<3000){
+    if(sizes[i%activeK] < gMax){ sizes[i%activeK]++; remainder--; }
+    i++; guard++;
+  }
+  return { sizes, resting: Math.max(0,remainder) };
+}
+function scoreAssignment(groups, epOrder, coOcc, visits){
+  let score=0;
+  groups.forEach((g,gi)=>{
+    const ep=epOrder[gi];
+    for(let a=0;a<g.length;a++){
+      for(let b=a+1;b<g.length;b++){
+        const c = coOcc[pairKey(g[a],g[b])]||0;
+        score += (c+1)*(c+1);
+      }
+      const v = (visits[g[a]] && visits[g[a]][ep]) || 0;
+      score += v*v*2;
+    }
+  });
+  return score;
+}
+function generateSchedule({teamIds, epreuveIds, nbCreneaux, groupMin, groupMax}){
+  const N=teamIds.length, K=epreuveIds.length;
+  const coOcc={}, visits={}; teamIds.forEach(id=>visits[id]={});
+  const restCount={}; teamIds.forEach(id=>restCount[id]=0);
+  const rounds=[];
+  for(let r=0;r<nbCreneaux;r++){
+    const {sizes, resting} = computeGroupSizes(N,K,groupMin,groupMax);
+    let activeEpreuves = epreuveIds;
+    if(sizes.length < K){
+      const restStart = r % K;
+      activeEpreuves = [];
+      for(let k=0;k<K && activeEpreuves.length<sizes.length;k++) activeEpreuves.push(epreuveIds[(restStart+k)%K]);
+    }
+    let best=null, bestScore=Infinity;
+    const attempts = N>60 ? 12 : 30;
+    for(let a=0;a<attempts;a++){
+      let restingTeams=[];
+      if(resting>0){
+        const sorted=[...teamIds].sort((x,y)=> restCount[x]-restCount[y] || Math.random()-0.5);
+        restingTeams = sorted.slice(0,resting);
+      }
+      let pool = teamIds.filter(id=>!restingTeams.includes(id));
+      shuffle(pool);
+      const groups=[]; let idx=0;
+      sizes.forEach(sz=>{ groups.push(pool.slice(idx, idx+sz)); idx+=sz; });
+      let epOrder=[...activeEpreuves]; shuffle(epOrder);
+      const sc = scoreAssignment(groups, epOrder, coOcc, visits);
+      if(sc<bestScore){ bestScore=sc; best={groups, epOrder, restingTeams}; }
+    }
+    const roundData={};
+    best.groups.forEach((g,gi)=>{ roundData[best.epOrder[gi]]=g; });
+    best.restingTeams.forEach(id=>restCount[id]++);
+    best.groups.forEach((g,gi)=>{
+      const ep=best.epOrder[gi];
+      g.forEach(id=>{ visits[id][ep]=(visits[id][ep]||0)+1; });
+      for(let x=0;x<g.length;x++) for(let y=x+1;y<g.length;y++) coOcc[pairKey(g[x],g[y])]=(coOcc[pairKey(g[x],g[y])]||0)+1;
+    });
+    rounds.push({ index:r, epreuves: roundData, resting: best.restingTeams });
+  }
+  return rounds;
+}
+
+/* ============================= RANKING FROM RAW SCORES (with ties) ============================= */
+function computeRankPoints(teamIds, rawScores, lowerBetter){
+  const size = teamIds.length;
+  const sorted = [...teamIds].sort((a,b)=> lowerBetter ? rawScores[a]-rawScores[b] : rawScores[b]-rawScores[a]);
+  const result = {};
+  let i=0;
+  while(i<sorted.length){
+    let j=i;
+    while(j+1<sorted.length && rawScores[sorted[j+1]]===rawScores[sorted[i]]) j++;
+    const pts = size - i;
+    for(let k=i;k<=j;k++) result[sorted[k]] = pts;
+    i = j+1;
+  }
+  return result;
+}
+
+/* ============================= APP STATE ============================= */
+let S = { view:'home', event:null, role:null, epreuveId:null, wiz:null, loading:false };
+let pollTimer = null;
+let animLocalScores = {}; // skey -> { teamId: value }
+let adminTab = 'planning';
+let lbTab = 'classement';
+
+function setView(v, extra={}){
+  clearPoll();
+  S = { ...S, view:v, ...extra };
+  render();
+}
+function clearPoll(){ if(pollTimer){ clearInterval(pollTimer); pollTimer=null; } }
+
+/* ============================= HOME ============================= */
+async function renderHome(){
+  const app=document.getElementById('app');
+  app.innerHTML = topbarHTML() + `
+    <div class="h1">Planifie tes rotations d'équipes</div>
+    <div class="sub">Crée un événement, génère des confrontations aléatoires et équilibrées (2 à 6 équipes par créneau), distribue un code à chaque animateur, et suis le classement et les photos en direct.</div>
+    <div class="card">
+      <div class="h2">Créer</div>
+      <button class="btn primary block" id="btnCreate">+ Nouvel événement</button>
     </div>
-  </div>
-</nav>
-
-<div class="hero">
-  <h1>Bienvenue sur <span>2ISD</span></h1>
-  <p>Découvrez nos outils professionnels pour optimiser vos prestations événementielles et gérer efficacement vos activités</p>
-</div>
-
-<div class="tools-grid" id="tools">
-  
-  <!-- Outil 1: Planificateur -->
-  <a href="1.html" class="tool-card" style="text-decoration:none;color:inherit">
-    <div class="tool-card-header">
-      <div class="tool-card-icon">📋</div>
-      <div class="tool-card-title">Planificateur</div>
+    <div class="card">
+      <div class="h2">Rejoindre avec un code</div>
+      <div class="sub" style="margin-bottom:10px;">Code animateur (saisie des résultats) ou code classement (écran public).</div>
+      <div class="row">
+        <input type="text" id="joinCode" placeholder="EX: A7K2Q" style="text-transform:uppercase;letter-spacing:2px;font-weight:700;" maxlength="8">
+        <button class="btn teal" id="btnJoin">Accéder</button>
+      </div>
+      <div id="joinErr" style="color:var(--danger);font-size:13px;margin-top:8px;"></div>
     </div>
-    <div class="tool-card-body">
-      <p class="tool-card-description">Calculez vos trajets, horaires et frais de route en temps réel. Optimisez vos prestations avec un calcul précis des itinéraires et des coûts.</p>
-      <div class="tool-features">
-        <div class="tool-feature">Calcul d'itinéraires précis</div>
-        <div class="tool-feature">Estimation des frais de route</div>
-        <div class="tool-feature">Restauration à proximité</div>
-        <div class="tool-feature">Vue d'ensemble France</div>
-        <div class="tool-feature">Export en PDF</div>
+    <div class="card">
+      <div class="h2">Mes événements</div>
+      <div id="evList"><div class="sub">Chargement…</div></div>
+    </div>
+    <div class="foot-note">Données stockées sur Firebase (Firestore + Storage) — persistantes, accessibles depuis n'importe quel appareil avec ce lien, indépendamment de Claude.</div>
+  `;
+  document.getElementById('btnCreate').onclick = ()=> startWizard();
+  document.getElementById('btnJoin').onclick = ()=> doJoin();
+  document.getElementById('joinCode').addEventListener('keydown', e=>{ if(e.key==='Enter') doJoin(); });
+
+  const listEl = document.getElementById('evList');
+  try{
+    const events = await listEvents(25);
+    if(events.length===0){
+      listEl.innerHTML = `<div class="empty"><div class="big">🏁</div>Aucun événement pour l'instant.</div>`;
+      return;
+    }
+    listEl.innerHTML = events.map(e=>`
+      <div class="team-row" style="cursor:pointer;" onclick="window.__openEvent('${e.id}')">
+        <div class="idx-badge">🏆</div>
+        <div style="flex:1;">
+          <div style="font-weight:700;font-size:14.5px;">${esc(e.name)}</div>
+          <div style="font-size:12px;color:var(--text-dim);">${e.teams.length} équipes · ${e.epreuves.length} épreuves ${e.date? '· '+fmtDate(e.date):''}</div>
+        </div>
+        <div class="pill">Ouvrir →</div>
+      </div>
+    `).join('');
+  }catch(e){
+    console.error(e);
+    listEl.innerHTML = `<div class="sub" style="color:var(--danger);">Impossible de charger les événements. Vérifie la configuration Firebase et les règles Firestore.</div>`;
+  }
+}
+window.__openEvent = async (id)=>{
+  const ev = await getEvent(id);
+  if(!ev){ toast("Événement introuvable"); return; }
+  setView('admin', { event: ev, role:'admin' });
+};
+async function doJoin(){
+  const codeEl = document.getElementById('joinCode');
+  const errEl = document.getElementById('joinErr');
+  const code = (codeEl.value||'').trim().toUpperCase();
+  errEl.textContent='';
+  if(!code){ errEl.textContent='Entre un code.'; return; }
+  try{
+    const info = await getCodeInfo(code);
+    if(!info){ errEl.textContent='Code inconnu. Vérifie la saisie.'; return; }
+    const ev = await getEvent(info.eventId);
+    if(!ev){ errEl.textContent="Cet événement n'existe plus."; return; }
+    if(info.role==='admin') setView('admin', { event: ev, role:'admin' });
+    else if(info.role==='animateur') setView('animateur', { event: ev, role:'animateur', epreuveId: info.epreuveId });
+    else if(info.role==='public') setView('leaderboard', { event: ev, role:'public' });
+  }catch(e){
+    console.error(e);
+    errEl.textContent='Erreur de connexion. Réessaie.';
+  }
+}
+function topbarHTML(){
+  return `<div class="topbar">
+    <div class="brand" onclick="window.__goHome()">
+      <div class="mark">R</div>
+      <div><div class="name">Rotation</div><div class="tag">Team Building</div></div>
+    </div>
+  </div>`;
+}
+window.__goHome = ()=> setView('home');
+
+/* ============================= WIZARD (CREATION) ============================= */
+function defaultWiz(){
+  return {
+    step:1,
+    name:'', date:'', startTime:'09:00', slotMinutes:30,
+    nbEpreuves:8,
+    epreuveNames: Array.from({length:8},(_,i)=>'Épreuve '+(i+1)),
+    epreuveLowerBetter: Array(8).fill(false),
+    nbTeams:40,
+    teams: Array.from({length:40},(_,i)=>({name:'Équipe '+(i+1), color: colorForIndex(i)})),
+    groupMin:5, groupMax:5,
+    nbCreneaux:8,
+    useTimeLabels:false
+  };
+}
+function startWizard(){ setView('wizard', { wiz: defaultWiz() }); }
+function syncEpreuveNames(){
+  const w=S.wiz; const n=w.nbEpreuves;
+  const arr=[...w.epreuveNames];
+  while(arr.length<n) arr.push('Épreuve '+(arr.length+1));
+  arr.length=n;
+  w.epreuveNames=arr;
+  const lb=[...(w.epreuveLowerBetter||[])];
+  while(lb.length<n) lb.push(false);
+  lb.length=n;
+  w.epreuveLowerBetter=lb;
+}
+function syncTeams(){
+  const w=S.wiz; const n=w.nbTeams;
+  const arr=[...w.teams];
+  while(arr.length<n) arr.push({name:'Équipe '+(arr.length+1), color: colorForIndex(arr.length)});
+  arr.length=n;
+  w.teams=arr;
+}
+
+function renderWizard(){
+  const app=document.getElementById('app');
+  const w=S.wiz;
+  syncEpreuveNames(); syncTeams();
+
+  const steps=['Infos','Épreuves','Équipes','Format','Récap'];
+  const stepperHTML = `<div class="stepper">${steps.map((s,i)=>`<div class="step-dot ${i+1<w.step?'done':(i+1===w.step?'active':'')}"></div>`).join('')}</div>`;
+
+  let body='';
+  if(w.step===1){
+    body = `
+      <div class="card">
+        <div class="h2">Étape 1 · Informations générales</div>
+        <label class="field-label">Nom de l'événement</label>
+        <input type="text" id="fName" placeholder="Ex: Séminaire Decathlon — Olympiades" value="${esc(w.name)}" style="margin-bottom:12px;">
+        <div class="row">
+          <div class="col"><label class="field-label">Date</label><input type="date" id="fDate" value="${w.date}"></div>
+          <div class="col"><label class="field-label">Heure de début</label><input type="time" id="fStart" value="${w.startTime}"></div>
+          <div class="col"><label class="field-label">Durée / créneau (min)</label><input type="number" id="fSlot" min="5" max="240" value="${w.slotMinutes}"></div>
+        </div>
+      </div>`;
+  } else if(w.step===2){
+    body = `
+      <div class="card">
+        <div class="h2">Étape 2 · Épreuves</div>
+        <label class="field-label">Nombre d'épreuves</label>
+        <input type="number" id="fNbEp" min="1" max="40" value="${w.nbEpreuves}" style="margin-bottom:14px;max-width:140px;">
+        <div id="epList">
+          ${w.epreuveNames.map((n,i)=>`
+            <div class="epreuve-row">
+              <div class="idx-badge">${i+1}</div>
+              <input type="text" data-ep="${i}" value="${esc(n)}" placeholder="Nom de l'épreuve" style="flex:1;">
+              <label style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-dim);white-space:nowrap;cursor:pointer;">
+                <input type="checkbox" data-eplow="${i}" ${w.epreuveLowerBetter && w.epreuveLowerBetter[i] ? 'checked':''} style="width:15px;height:15px;">
+                Meilleur score = le plus bas (chrono)
+              </label>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  } else if(w.step===3){
+    body = `
+      <div class="card">
+        <div class="h2">Étape 3 · Équipes</div>
+        <label class="field-label">Nombre d'équipes</label>
+        <input type="number" id="fNbTeams" min="2" max="300" value="${w.nbTeams}" style="margin-bottom:14px;max-width:140px;">
+        <div id="teamList">
+          ${w.teams.map((t,i)=>`
+            <div class="team-row">
+              <div class="idx-badge">${i+1}</div>
+              <input type="color" data-teamc="${i}" value="${t.color}">
+              <input type="text" data-team="${i}" value="${esc(t.name)}" placeholder="Nom de l'équipe">
+            </div>`).join('')}
+        </div>
+      </div>`;
+  } else if(w.step===4){
+    body = `
+      <div class="card">
+        <div class="h2">Étape 4 · Format des créneaux</div>
+        <div class="sub">Combien d'équipes se confrontent en même temps sur une épreuve ? L'appli mélangera aléatoirement en variant les compositions et en équilibrant les passages.</div>
+        <div class="row" style="margin-bottom:14px;">
+          <div class="col"><label class="field-label">Taille de groupe minimum</label><select id="fGMin">${[2,3,4,5,6].map(v=>`<option value="${v}" ${w.groupMin===v?'selected':''}>${v} équipes</option>`).join('')}</select></div>
+          <div class="col"><label class="field-label">Taille de groupe maximum</label><select id="fGMax">${[2,3,4,5,6].map(v=>`<option value="${v}" ${w.groupMax===v?'selected':''}>${v} équipes</option>`).join('')}</select></div>
+        </div>
+        <label class="field-label">Nombre de créneaux (rotations)</label>
+        <input type="number" id="fNbCr" min="1" max="60" value="${w.nbCreneaux}" style="max-width:140px;margin-bottom:14px;">
+        <label style="display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer;">
+          <input type="checkbox" id="fUseTime" ${w.useTimeLabels?'checked':''} style="width:18px;height:18px;">
+          Étiqueter les créneaux avec des horaires (à partir de l'heure de début)
+        </label>
+      </div>`;
+  } else if(w.step===5){
+    const N=w.teams.length, K=w.epreuveNames.length;
+    body = `
+      <div class="card">
+        <div class="h2">Étape 5 · Récapitulatif</div>
+        <div class="kv"><span>Événement</span><b>${esc(w.name||'(sans nom)')}</b></div>
+        <div class="kv"><span>Équipes</span><b>${N}</b></div>
+        <div class="kv"><span>Épreuves</span><b>${K}</b></div>
+        <div class="kv"><span>Taille de groupe</span><b>${w.groupMin===w.groupMax? w.groupMin : (w.groupMin+' à '+w.groupMax)} équipes</b></div>
+        <div class="kv"><span>Créneaux</span><b>${w.nbCreneaux}</b></div>
+        <div class="divider"></div>
+        <button class="btn primary block" id="btnGenerate">${S.loading?'<span class="spin"></span> Génération…':'🎲 Générer le planning'}</button>
+      </div>`;
+  }
+
+  app.innerHTML = topbarHTML() + `
+    <div class="back-link" id="wizBack">← Retour à l'accueil</div>
+    <div class="h1">Nouvel événement</div>
+    ${stepperHTML}
+    ${body}
+    <div class="row" style="margin-top:6px;">
+      ${w.step>1?'<button class="btn ghost" id="btnPrev">← Précédent</button>':'<div></div>'}
+      ${w.step<5?'<button class="btn primary" id="btnNext" style="margin-left:auto;">Suivant →</button>':''}
+    </div>
+  `;
+  document.getElementById('wizBack').onclick = ()=> setView('home');
+  const prevBtn=document.getElementById('btnPrev'); if(prevBtn) prevBtn.onclick=()=>{ w.step--; render(); };
+  const nextBtn=document.getElementById('btnNext'); if(nextBtn) nextBtn.onclick=()=>{ w.step++; render(); };
+  const genBtn=document.getElementById('btnGenerate'); if(genBtn) genBtn.onclick=()=> doGenerate();
+
+  if(w.step===1){
+    document.getElementById('fName').oninput = e=> w.name=e.target.value;
+    document.getElementById('fDate').oninput = e=> w.date=e.target.value;
+    document.getElementById('fStart').oninput = e=> w.startTime=e.target.value;
+    document.getElementById('fSlot').oninput = e=> w.slotMinutes=parseInt(e.target.value)||30;
+  }
+  if(w.step===2){
+    document.getElementById('fNbEp').oninput = e=>{ w.nbEpreuves=Math.max(1,parseInt(e.target.value)||1); syncEpreuveNames(); renderWizard(); };
+    document.querySelectorAll('[data-ep]').forEach(inp=>{ inp.oninput = e=>{ w.epreuveNames[parseInt(inp.dataset.ep)] = e.target.value; }; });
+    document.querySelectorAll('[data-eplow]').forEach(inp=>{ inp.onchange = e=>{ w.epreuveLowerBetter[parseInt(inp.dataset.eplow)] = e.target.checked; }; });
+  }
+  if(w.step===3){
+    document.getElementById('fNbTeams').oninput = e=>{ w.nbTeams=Math.max(2,parseInt(e.target.value)||2); syncTeams(); renderWizard(); };
+    document.querySelectorAll('[data-team]').forEach(inp=>{ inp.oninput = e=>{ w.teams[parseInt(inp.dataset.team)].name = e.target.value; }; });
+    document.querySelectorAll('[data-teamc]').forEach(inp=>{ inp.oninput = e=>{ w.teams[parseInt(inp.dataset.teamc)].color = e.target.value; }; });
+  }
+  if(w.step===4){
+    document.getElementById('fGMin').onchange = e=>{ w.groupMin=parseInt(e.target.value); if(w.groupMax<w.groupMin) w.groupMax=w.groupMin; renderWizard(); };
+    document.getElementById('fGMax').onchange = e=>{ w.groupMax=parseInt(e.target.value); if(w.groupMin>w.groupMax) w.groupMin=w.groupMax; renderWizard(); };
+    document.getElementById('fNbCr').oninput = e=> w.nbCreneaux=Math.max(1,parseInt(e.target.value)||1);
+    document.getElementById('fUseTime').onchange = e=> w.useTimeLabels=e.target.checked;
+  }
+}
+
+async function doGenerate(){
+  const w=S.wiz;
+  if(!w.name || !w.name.trim()){ toast('Donne un nom à ton événement.'); w.step=1; render(); return; }
+  S.loading=true; render();
+
+  try{
+    const eventId = uid('evt');
+    const epreuves = w.epreuveNames.map((n,i)=>({ id:'ep'+i+'_'+Math.random().toString(36).slice(2,6), name:n||('Épreuve '+(i+1)), lowerBetter: !!(w.epreuveLowerBetter && w.epreuveLowerBetter[i]) }));
+    const teams = w.teams.map((t,i)=>({ id:'tm'+i+'_'+Math.random().toString(36).slice(2,6), name:t.name||('Équipe '+(i+1)), color:t.color }));
+
+    const schedule = generateSchedule({
+      teamIds: teams.map(t=>t.id),
+      epreuveIds: epreuves.map(e=>e.id),
+      nbCreneaux: w.nbCreneaux,
+      groupMin: w.groupMin,
+      groupMax: w.groupMax
+    });
+
+    let creneauLabels=[];
+    if(w.useTimeLabels && w.startTime){
+      const [h,m]=w.startTime.split(':').map(Number);
+      let mins=h*60+m;
+      for(let i=0;i<w.nbCreneaux;i++){
+        const hh=Math.floor(mins/60)%24, mm=mins%60;
+        creneauLabels.push(String(hh).padStart(2,'0')+'h'+String(mm).padStart(2,'0'));
+        mins+=w.slotMinutes;
+      }
+    } else {
+      creneauLabels = Array.from({length:w.nbCreneaux},(_,i)=>'Créneau '+(i+1));
+    }
+
+    const adminCode=genCode(5), publicCode=genCode(5);
+    const epCodes={};
+    epreuves.forEach(ep=> epCodes[ep.id]=genCode(5));
+
+    const event = {
+      id: eventId, name: w.name.trim(), date: w.date, createdAt: Date.now(),
+      epreuves, teams, groupMin:w.groupMin, groupMax:w.groupMax,
+      nbCreneaux: w.nbCreneaux, creneauLabels, schedule,
+      codes: { admin: adminCode, public: publicCode, epreuves: epCodes }
+    };
+
+    await setEvent(eventId, event);
+    await registerCodes(eventId, event.codes);
+
+    S.loading=false;
+    setView('codes', { event, role:'admin' });
+  }catch(e){
+    console.error(e);
+    S.loading=false; render();
+    toast("Erreur lors de la création. Vérifie la configuration Firebase et les règles Firestore.");
+  }
+}
+
+/* ============================= CODES SCREEN ============================= */
+function renderCodes(){
+  const ev=S.event;
+  const app=document.getElementById('app');
+  app.innerHTML = topbarHTML() + `
+    <div class="h1">🎉 Planning généré</div>
+    <div class="sub">Distribue un code à chaque animateur et à l'écran d'affichage. Chaque code donne accès uniquement à sa page.</div>
+    <div class="card">
+      <div class="h2">Accès organisateur</div>
+      <div class="code-box"><div><div class="lbl">Code Admin (tableau de bord complet)</div><div class="code">${ev.codes.admin}</div></div><button class="btn sm" onclick="copyToClipboard('${ev.codes.admin}')">Copier</button></div>
+      <div class="code-box"><div><div class="lbl">Code Classement public (écran d'affichage)</div><div class="code">${ev.codes.public}</div></div><button class="btn sm" onclick="copyToClipboard('${ev.codes.public}')">Copier</button></div>
+    </div>
+    <div class="card">
+      <div class="h2">Codes animateurs (1 par épreuve)</div>
+      ${ev.epreuves.map(ep=>`
+        <div class="code-box"><div><div class="lbl">${esc(ep.name)}</div><div class="code">${ev.codes.epreuves[ep.id]}</div></div><button class="btn sm" onclick="copyToClipboard('${ev.codes.epreuves[ep.id]}')">Copier</button></div>`).join('')}
+    </div>
+    <button class="btn primary block" id="btnGoAdmin">Aller au tableau de bord →</button>
+  `;
+  document.getElementById('btnGoAdmin').onclick = ()=> setView('admin', { event: ev, role:'admin' });
+}
+
+/* ============================= ADMIN DASHBOARD ============================= */
+async function renderAdmin(){
+  const ev=S.event;
+  const app=document.getElementById('app');
+  app.innerHTML = topbarHTML() + `
+    <div class="back-link" id="backHome">← Accueil</div>
+    <div class="h1">${esc(ev.name)}</div>
+    <div class="sub">${ev.teams.length} équipes · ${ev.epreuves.length} épreuves · ${ev.nbCreneaux} créneaux ${ev.date?'· '+fmtDate(ev.date):''}</div>
+    <div class="tabs">
+      <div class="tab ${adminTab==='planning'?'active':''}" data-tab="planning">Planning</div>
+      <div class="tab ${adminTab==='scores'?'active':''}" data-tab="scores">Scores</div>
+      <div class="tab ${adminTab==='classement'?'active':''}" data-tab="classement">Classement</div>
+      <div class="tab ${adminTab==='photos'?'active':''}" data-tab="photos">Photos</div>
+      <div class="tab ${adminTab==='codes'?'active':''}" data-tab="codes">Codes</div>
+      <div class="tab ${adminTab==='reglages'?'active':''}" data-tab="reglages">Réglages</div>
+    </div>
+    <div id="adminBody"></div>
+  `;
+  document.getElementById('backHome').onclick = ()=> setView('home');
+  document.querySelectorAll('.tab').forEach(t=> t.onclick = ()=>{ adminTab=t.dataset.tab; renderAdmin(); });
+
+  const body=document.getElementById('adminBody');
+  if(adminTab==='planning') renderAdminPlanning(body);
+  else if(adminTab==='scores') await renderAdminScores(body);
+  else if(adminTab==='classement') await renderAdminClassement(body);
+  else if(adminTab==='photos') await renderAdminPhotos(body);
+  else if(adminTab==='codes') renderAdminCodes(body);
+  else if(adminTab==='reglages') renderAdminReglages(body);
+
+  clearPoll();
+  if(adminTab==='classement'){
+    pollTimer = setInterval(()=>{ if(S.view==='admin' && adminTab==='classement') renderAdminClassement(document.getElementById('adminBody')); }, 6000);
+  }
+}
+
+function renderAdminPlanning(body){
+  const ev=S.event;
+  const rows = ev.schedule.map((rd,ri)=>{
+    const cells = ev.epreuves.map(ep=>{
+      const g = rd.epreuves[ep.id];
+      if(!g) return `<td><span class="rest-tag">—</span></td>`;
+      return `<td><div class="group-cell">${g.map(tid=>{
+        const t = ev.teams.find(x=>x.id===tid);
+        if(!t) return '';
+        return `<span class="chip"><span class="dot" style="background:${t.color}"></span>${esc(t.name)}</span>`;
+      }).join('')}</div></td>`;
+    }).join('');
+    const restHTML = rd.resting && rd.resting.length ? `<td><span class="rest-tag">Repos: ${rd.resting.map(tid=>{const t=ev.teams.find(x=>x.id===tid); return t?esc(t.name):'';}).join(', ')}</span></td>` : '<td></td>';
+    return `<tr><td>${esc(ev.creneauLabels[ri]||('Créneau '+(ri+1)))}</td>${cells}${restHTML}</tr>`;
+  }).join('');
+  body.innerHTML = `
+    <div class="card tight">
+      <div class="grid-wrap">
+        <table class="plan">
+          <thead><tr><th>Créneau</th>${ev.epreuves.map(ep=>`<th>${esc(ep.name)}</th>`).join('')}<th>Repos</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
       </div>
     </div>
-    <div class="tool-card-footer">
-      <button class="btn btn-primary" onclick="window.open('1.html');return false">Accéder →</button>
-    </div>
-  </a>
+  `;
+}
 
-  <!-- Outil 2: Configurateur -->
-  <a href="2.html" class="tool-card" style="text-decoration:none;color:inherit">
-    <div class="tool-card-header">
-      <div class="tool-card-icon">⚙️</div>
-      <div class="tool-card-title">Configurateur</div>
+async function renderAdminCodes(body){
+  const ev=S.event;
+  body.innerHTML = `
+    <div class="card">
+      <div class="h2">Accès organisateur</div>
+      <div class="code-box"><div><div class="lbl">Code Admin</div><div class="code">${ev.codes.admin}</div></div><button class="btn sm" onclick="copyToClipboard('${ev.codes.admin}')">Copier</button></div>
+      <div class="code-box"><div><div class="lbl">Code Classement public</div><div class="code">${ev.codes.public}</div></div><button class="btn sm" onclick="copyToClipboard('${ev.codes.public}')">Copier</button></div>
     </div>
-    <div class="tool-card-body">
-      <p class="tool-card-description">Configurez vos activités événementielles avec précision. Générez des fiches détaillées avec tous les paramètres nécessaires.</p>
-      <div class="tool-features">
-        <div class="tool-feature">Sélection d'activités</div>
-        <div class="tool-feature">Paramètres personnalisables</div>
-        <div class="tool-feature">Préconisations intégrées</div>
-        <div class="tool-feature">Fiche complète générée</div>
-        <div class="tool-feature">Export PDF optimisé</div>
+    <div class="card">
+      <div class="h2">Codes animateurs</div>
+      ${ev.epreuves.map(ep=>`
+        <div class="code-box"><div><div class="lbl">${esc(ep.name)}</div><div class="code">${ev.codes.epreuves[ep.id]}</div></div><button class="btn sm" onclick="copyToClipboard('${ev.codes.epreuves[ep.id]}')">Copier</button></div>`).join('')}
+    </div>
+  `;
+}
+
+function renderAdminReglages(body){
+  const ev=S.event;
+  body.innerHTML = `
+    <div class="card">
+      <div class="h2">Équipes</div>
+      ${ev.teams.map(t=>`<span class="chip" style="margin:0 6px 6px 0;"><span class="dot" style="background:${t.color}"></span>${esc(t.name)}</span>`).join('')}
+    </div>
+    <div class="card">
+      <div class="h2">Épreuves</div>
+      ${ev.epreuves.map(e=>`<span class="chip" style="margin:0 6px 6px 0;">${esc(e.name)}${e.lowerBetter?' ⏱':''}</span>`).join('')}
+    </div>
+    <div class="card">
+      <div class="h2">Zone sensible</div>
+      <button class="btn danger" id="btnReset">Réinitialiser tous les résultats</button>
+    </div>
+  `;
+  const btn=document.getElementById('btnReset');
+  if(btn) btn.onclick = async ()=>{
+    if(!confirm('Effacer tous les résultats saisis pour cet événement ?')) return;
+    for(const ep of ev.epreuves) await clearScores(ev.id, ep.id);
+    toast('Résultats réinitialisés.');
+  };
+}
+
+async function computeStandings(ev){
+  const points = {}; ev.teams.forEach(t=> points[t.id]=0);
+  const played = {}; ev.teams.forEach(t=> played[t.id]=0);
+  let totalRoundsScored=0, totalRoundsPossible=0;
+  for(const ep of ev.epreuves){
+    const rounds = await getScores(ev.id, ep.id);
+    ev.schedule.forEach((rd,ri)=>{
+      const g = rd.epreuves[ep.id];
+      if(!g) return;
+      totalRoundsPossible++;
+      const raw = rounds[ri];
+      const complete = raw && g.every(tid=> raw[tid]!==undefined && raw[tid]!==null && !isNaN(raw[tid]));
+      if(complete){
+        totalRoundsScored++;
+        const rankPts = computeRankPoints(g, raw, !!ep.lowerBetter);
+        g.forEach(tid=>{
+          points[tid] = (points[tid]||0) + (rankPts[tid]||0);
+          played[tid] = (played[tid]||0) + 1;
+        });
+      }
+    });
+  }
+  const standings = ev.teams.map(t=>({ team:t, points: points[t.id]||0, played: played[t.id]||0 }))
+    .sort((a,b)=> b.points-a.points || a.team.name.localeCompare(b.team.name));
+  return { standings, totalRoundsScored, totalRoundsPossible };
+}
+
+async function renderAdminClassement(body){
+  const ev=S.event;
+  body.innerHTML = `<div class="card"><div class="sub">Calcul du classement…</div></div>`;
+  const { standings, totalRoundsScored, totalRoundsPossible } = await computeStandings(ev);
+  const maxPts = Math.max(1, ...standings.map(s=>s.points));
+  body.innerHTML = `
+    <div class="card">
+      <div class="row" style="align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div class="h2" style="margin:0;"><span class="live-dot"></span>&nbsp; Classement en direct</div>
+        <div class="pill">${totalRoundsScored}/${totalRoundsPossible} manches saisies</div>
       </div>
+      ${standings.map((s,i)=>`
+        <div class="lb-row">
+          <div class="lb-rank ${i===0?'top1':''}">${i+1}</div>
+          <div class="lb-bar-wrap">
+            <div class="lb-name"><span class="dot" style="background:${s.team.color}"></span>${esc(s.team.name)} <span style="color:var(--text-faint);font-weight:400;font-size:11.5px;">(${s.played} manches)</span></div>
+            <div class="lb-bar-bg"><div class="lb-bar" style="width:${(s.points/maxPts*100)}%;background:${s.team.color}"></div></div>
+          </div>
+          <div class="lb-pts">${s.points}</div>
+        </div>
+      `).join('')}
     </div>
-    <div class="tool-card-footer">
-      <button class="btn btn-primary" onclick="window.open('2.html');return false">Accéder →</button>
+  `;
+}
+
+/* ============================= SCORE ENTRY (shared: animateur + admin) ============================= */
+function drawTeamPoints(skey, epId, ri, group, ev, lowerBetter, photo, onPhotoUploaded){
+  const el = document.getElementById('teamPoints_'+skey);
+  if(!el) return;
+  const local = animLocalScores[skey];
+  const withVals = {};
+  group.forEach(tid=>{ const v=local[tid]; if(v!==''&&v!==null&&v!==undefined&&!isNaN(v)) withVals[tid]=Number(v); });
+  const preview = Object.keys(withVals).length>0 ? computeRankPoints(Object.keys(withVals), withVals, lowerBetter) : {};
+
+  el.innerHTML = group.map(tid=>{
+    const t = ev.teams.find(x=>x.id===tid);
+    const val = local[tid];
+    const pts = preview[tid];
+    return `
+      <div class="team-tap" style="cursor:default;">
+        <div class="dot" style="background:${t.color}"></div>
+        <div style="flex:1;font-weight:600;">${esc(t.name)}</div>
+        ${pts!==undefined ? `<div class="pill" style="font-size:11px;">${pts} pt${pts>1?'s':''} classement</div>` : ''}
+        <input type="number" step="any" inputmode="decimal" data-tid="${tid}" data-skey="${skey}" value="${val}" placeholder="Score" style="width:100px;text-align:right;">
+      </div>`;
+  }).join('') + `
+    <div class="row" style="align-items:center;margin-top:6px;">
+      <button class="btn ghost sm" id="photoBtn_${skey}" type="button">📷 ${photo?'Remplacer la photo':'Ajouter une photo preuve'}</button>
+      ${photo?`<a href="${photo.url}" target="_blank"><img src="${photo.url}" class="photo-thumb"></a>`:''}
+    </div>`;
+
+  el.querySelectorAll('input[type=number]').forEach(inp=>{
+    inp.oninput = e=>{
+      const tid=inp.dataset.tid, sk=inp.dataset.skey;
+      animLocalScores[sk][tid] = e.target.value;
+      drawTeamPoints(sk, epId, ri, group, ev, lowerBetter, photo, onPhotoUploaded);
+      const again = document.querySelector(`input[data-tid="${tid}"][data-skey="${sk}"]`);
+      if(again){ again.focus(); const p=again.value.length; try{ again.setSelectionRange(p,p); }catch(e){} }
+    };
+  });
+  const photoBtn = document.getElementById('photoBtn_'+skey);
+  if(photoBtn) photoBtn.onclick = ()=>{
+    pickAndUpload(ev.id, { type:'result', epreuveId: epId, roundIndex: ri }, (doc)=>{
+      if(onPhotoUploaded) onPhotoUploaded(doc);
+    });
+  };
+}
+
+async function saveRoundScores(ev, epId, ri, group, lowerBetter, skey){
+  const local = animLocalScores[skey];
+  const missing = group.some(tid=> local[tid]===''||local[tid]===null||local[tid]===undefined||isNaN(local[tid]));
+  if(missing){ toast('Renseigne un score pour toutes les équipes avant d\u2019enregistrer.'); return; }
+  const raw = {}; group.forEach(tid=> raw[tid]=Number(local[tid]));
+  try{
+    await saveRoundScoreData(ev.id, epId, ri, raw);
+    const statusEl = document.getElementById('roundStatus_'+skey);
+    if(statusEl) statusEl.textContent='✓ Enregistré';
+    toast('Scores enregistrés ✓');
+  }catch(e){
+    console.error(e);
+    toast("Échec de l'enregistrement. Réessaie.");
+  }
+}
+
+async function renderAdminScores(body){
+  const ev=S.event;
+  body.innerHTML = `<div class="card"><div class="sub">Chargement…</div></div>`;
+  const scoresByEp = {}, photos = await getEventPhotos(ev.id);
+  for(const ep of ev.epreuves){ scoresByEp[ep.id] = await getScores(ev.id, ep.id); }
+
+  const blocks = ev.epreuves.map(ep=>{
+    const scores = scoresByEp[ep.id];
+    const rounds = ev.schedule.map((rd,ri)=>({rd,ri})).filter(x=>x.rd.epreuves[ep.id]);
+    const doneCount = rounds.filter(({ri})=>{
+      const g = ev.schedule[ri].epreuves[ep.id];
+      const raw = scores[ri];
+      return raw && g.every(tid=> raw[tid]!==undefined && raw[tid]!==null && !isNaN(raw[tid]));
+    }).length;
+    return `
+      <details class="card" style="padding:0;overflow:hidden;">
+        <summary style="cursor:pointer;padding:16px 18px;font-weight:800;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <span>${esc(ep.name)}${ep.lowerBetter?' <span style="font-size:11px;color:var(--text-faint);font-weight:500;">(chrono)</span>':''}</span>
+          <span class="pill">${doneCount}/${rounds.length} saisis</span>
+        </summary>
+        <div style="padding:2px 18px 18px;" id="adminEpBlock_${ep.id}"></div>
+      </details>`;
+  }).join('');
+
+  body.innerHTML = `<div class="sub" style="margin-bottom:10px;">Modifie ou saisis les scores de n'importe quelle épreuve, en plus des animateurs sur le terrain.</div>` +
+    (blocks || `<div class="empty"><div class="big">🤷</div>Aucune épreuve.</div>`);
+
+  for(const ep of ev.epreuves){
+    const cont = document.getElementById('adminEpBlock_'+ep.id);
+    if(!cont) continue;
+    const scores = scoresByEp[ep.id];
+    const rounds = ev.schedule.map((rd,ri)=>({rd,ri})).filter(x=>x.rd.epreuves[ep.id]);
+    const lowerBetter = !!ep.lowerBetter;
+    cont.innerHTML = (rounds.map(({rd,ri})=>{
+      const group = rd.epreuves[ep.id];
+      const skey = ep.id+'__'+ri;
+      const saved = scores[ri];
+      const isComplete = saved && group.every(tid=> saved[tid]!==undefined && saved[tid]!==null && !isNaN(saved[tid]));
+      const local = {}; group.forEach(tid=> local[tid] = saved && saved[tid]!==undefined ? saved[tid] : '');
+      animLocalScores[skey] = local;
+      return `
+        <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:14px;">
+          <div class="row" style="align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div style="font-weight:700;font-size:13.5px;">${esc(ev.creneauLabels[ri]||('Créneau '+(ri+1)))}</div>
+            <div class="pill" id="roundStatus_${skey}">${isComplete?'✓ Enregistré':'À saisir'}</div>
+          </div>
+          <div id="teamPoints_${skey}"></div>
+          <div class="row" style="margin-top:8px;">
+            <button class="btn ghost sm" id="resetBtn_${skey}">↺ Vider</button>
+            <button class="btn primary sm" id="saveBtn_${skey}" style="margin-left:auto;">Enregistrer</button>
+          </div>
+        </div>`;
+    }).join('')) || `<div class="sub" style="padding-top:10px;">Aucun créneau pour cette épreuve.</div>`;
+
+    rounds.forEach(({rd,ri})=>{
+      const group = rd.epreuves[ep.id];
+      const skey = ep.id+'__'+ri;
+      const photo = photos.find(p=> p.type==='result' && p.epreuveId===ep.id && p.roundIndex===ri) || null;
+      drawTeamPoints(skey, ep.id, ri, group, ev, lowerBetter, photo, ()=> renderAdminScores(document.getElementById('adminBody')));
+      document.getElementById('resetBtn_'+skey).onclick = ()=>{ group.forEach(tid=>animLocalScores[skey][tid]=''); drawTeamPoints(skey, ep.id, ri, group, ev, lowerBetter, photo, ()=> renderAdminScores(document.getElementById('adminBody'))); };
+      document.getElementById('saveBtn_'+skey).onclick = ()=> saveRoundScores(ev, ep.id, ri, group, lowerBetter, skey);
+    });
+  }
+}
+
+/* ============================= PHOTOS: gallery grid + admin/leaderboard tabs ============================= */
+function renderGalleryGrid(photos){
+  if(!photos.length) return `<div class="empty"><div class="big">📷</div>Aucune photo pour le moment.</div>`;
+  return `<div class="gallery-grid">${photos.map(p=>`<a href="${p.url}" target="_blank" title="${p.type==='result'?'Photo résultat':'Galerie'}"><img src="${p.url}" loading="lazy"></a>`).join('')}</div>`;
+}
+async function renderAdminPhotos(body){
+  const ev=S.event;
+  body.innerHTML = `<div class="card"><div class="sub">Chargement…</div></div>`;
+  const photos = await getEventPhotos(ev.id);
+  body.innerHTML = `
+    <div class="card">
+      <div class="row" style="align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="h2" style="margin:0;">Galerie de l'événement</div>
+        <button class="btn primary sm" id="btnAddGalleryPhoto">+ Ajouter une photo</button>
+      </div>
+      ${renderGalleryGrid(photos)}
+    </div>`;
+  document.getElementById('btnAddGalleryPhoto').onclick = ()=>{
+    pickAndUpload(ev.id, { type:'gallery' }, ()=> renderAdminPhotos(document.getElementById('adminBody')));
+  };
+}
+
+/* ============================= ANIMATEUR VIEW ============================= */
+async function renderAnimateur(){
+  const ev=S.event; const epId=S.epreuveId;
+  const ep = ev.epreuves.find(e=>e.id===epId);
+  const app=document.getElementById('app');
+  animLocalScores = {};
+
+  const relevantRounds = ev.schedule.map((rd,ri)=>({rd,ri})).filter(x=> x.rd.epreuves[epId]);
+
+  app.innerHTML = topbarHTML() + `
+    <div class="back-link" id="backHome">← Quitter</div>
+    <div class="row" style="align-items:center;justify-content:space-between;">
+      <div class="h1" style="margin-bottom:2px;">🎯 ${esc(ep?ep.name:'Épreuve')}</div>
+      <button class="btn ghost sm" id="btnAddGallery">📷 Galerie</button>
     </div>
-  </a>
+    <div class="sub">${esc(ev.name)} · Code animateur actif${ep && ep.lowerBetter ? ' · Meilleur score = le plus bas (chrono)' : ''}</div>
+    <div id="animRounds"></div>
+    <div class="foot-note">Saisis le score obtenu par chaque équipe sur cet atelier. Le classement et les points (1er = nombre d'équipes du groupe, dernier = 1 point) sont calculés automatiquement, égalités comprises.</div>
+  `;
+  document.getElementById('backHome').onclick = ()=> setView('home');
+  document.getElementById('btnAddGallery').onclick = ()=>{
+    pickAndUpload(ev.id, { type:'gallery' }, ()=> toast('Photo ajoutée à la galerie de l\u2019événement ✓'));
+  };
 
-</div>
+  const cont = document.getElementById('animRounds');
+  if(relevantRounds.length===0){
+    cont.innerHTML = `<div class="empty"><div class="big">🤷</div>Aucun créneau assigné à cette épreuve.</div>`;
+    return;
+  }
 
-<footer class="footer">
-  <p>&copy; 2026 2ISD - Planificateur de Prestation Événementielle</p>
-  <p>Tous les outils sont optimisés pour faciliter votre gestion de projet</p>
-</footer>
+  const [scores, photos] = await Promise.all([ getScores(ev.id, epId), getEventPhotos(ev.id) ]);
 
+  cont.innerHTML = relevantRounds.map(({rd,ri})=>{
+    const group = rd.epreuves[epId];
+    const saved = scores[ri];
+    const isComplete = saved && group.every(tid=> saved[tid]!==undefined && saved[tid]!==null && !isNaN(saved[tid]));
+    const local = {}; group.forEach(tid=> local[tid] = saved && saved[tid]!==undefined ? saved[tid] : '');
+    const skey = epId+'__'+ri;
+    animLocalScores[skey] = local;
+    return `
+    <div class="card" id="roundCard_${skey}">
+      <div class="row" style="align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div class="h2" style="margin:0;">${esc(ev.creneauLabels[ri]||('Créneau '+(ri+1)))}</div>
+        <div class="pill" id="roundStatus_${skey}">${isComplete ? '✓ Enregistré' : 'À saisir'}</div>
+      </div>
+      <div id="teamPoints_${skey}"></div>
+      <div class="row" style="margin-top:10px;">
+        <button class="btn ghost sm" id="resetBtn_${skey}">↺ Vider</button>
+        <button class="btn primary sm" id="saveBtn_${skey}" style="margin-left:auto;">Enregistrer les scores</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  relevantRounds.forEach(({rd,ri})=>{
+    const group = rd.epreuves[epId];
+    const lowerBetter = ep ? !!ep.lowerBetter : false;
+    const skey = epId+'__'+ri;
+    const photo = photos.find(p=> p.type==='result' && p.epreuveId===epId && p.roundIndex===ri) || null;
+    drawTeamPoints(skey, epId, ri, group, ev, lowerBetter, photo, ()=> renderAnimateur());
+    document.getElementById('resetBtn_'+skey).onclick = ()=>{ group.forEach(tid=> animLocalScores[skey][tid]=''); drawTeamPoints(skey, epId, ri, group, ev, lowerBetter, photo, ()=> renderAnimateur()); };
+    document.getElementById('saveBtn_'+skey).onclick = ()=> saveRoundScores(ev, epId, ri, group, lowerBetter, skey);
+  });
+}
+
+/* ============================= LEADERBOARD (public) ============================= */
+async function renderLeaderboard(){
+  const ev=S.event;
+  const app=document.getElementById('app');
+  app.innerHTML = topbarHTML() + `
+    <div class="back-link" id="backHome">← Quitter</div>
+    <div class="h1">🏆 ${esc(ev.name)}</div>
+    <div class="tabs">
+      <div class="tab ${lbTab==='classement'?'active':''}" data-lbtab="classement">Classement</div>
+      <div class="tab ${lbTab==='galerie'?'active':''}" data-lbtab="galerie">Galerie</div>
+    </div>
+    <div id="lbBody"><div class="card"><div class="sub">Chargement…</div></div></div>
+  `;
+  document.getElementById('backHome').onclick = ()=> setView('home');
+  document.querySelectorAll('[data-lbtab]').forEach(t=> t.onclick = ()=>{ lbTab=t.dataset.lbtab; renderLeaderboard(); });
+
+  if(lbTab==='classement'){
+    await drawLeaderboardBody();
+    clearPoll();
+    pollTimer = setInterval(()=>{ if(S.view==='leaderboard' && lbTab==='classement') drawLeaderboardBody(); }, 5000);
+  } else {
+    await drawGalleryBody();
+    clearPoll();
+    pollTimer = setInterval(()=>{ if(S.view==='leaderboard' && lbTab==='galerie') drawGalleryBody(); }, 8000);
+  }
+}
+async function drawLeaderboardBody(){
+  const ev=S.event;
+  const el=document.getElementById('lbBody');
+  if(!el) return;
+  const { standings, totalRoundsScored, totalRoundsPossible } = await computeStandings(ev);
+  const maxPts = Math.max(1, ...standings.map(s=>s.points));
+  const now = new Date().toLocaleTimeString('fr-FR');
+  el.innerHTML = `
+    <div class="card">
+      <div class="row" style="align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div class="pill"><span class="live-dot"></span>&nbsp;${totalRoundsScored}/${totalRoundsPossible} manches saisies</div>
+        <div class="pill">Actualisé à ${now}</div>
+      </div>
+      ${standings.map((s,i)=>`
+        <div class="lb-row">
+          <div class="lb-rank ${i===0?'top1':''}">${i+1}</div>
+          <div class="lb-bar-wrap">
+            <div class="lb-name"><span class="dot" style="background:${s.team.color}"></span>${esc(s.team.name)}</div>
+            <div class="lb-bar-bg"><div class="lb-bar" style="width:${(s.points/maxPts*100)}%;background:${s.team.color}"></div></div>
+          </div>
+          <div class="lb-pts">${s.points}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+async function drawGalleryBody(){
+  const ev=S.event;
+  const el=document.getElementById('lbBody');
+  if(!el) return;
+  const photos = await getEventPhotos(ev.id);
+  el.innerHTML = `<div class="card">${renderGalleryGrid(photos)}</div>`;
+}
+
+/* ============================= ROUTER / RENDER ============================= */
+function render(){
+  clearPoll();
+  if(S.view==='home') renderHome();
+  else if(S.view==='wizard') renderWizard();
+  else if(S.view==='codes') renderCodes();
+  else if(S.view==='admin') renderAdmin();
+  else if(S.view==='animateur') renderAnimateur();
+  else if(S.view==='leaderboard') renderLeaderboard();
+}
+
+if(firebaseReady) render();
+</script>
 </body>
 </html>
